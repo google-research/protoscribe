@@ -1,0 +1,199 @@
+{
+  "decoder": {
+    "decoder_norm": {
+      "scale": [13]
+    },
+    "layers_0": {
+      "encoder_decoder_attention": {
+        "key": {
+          "kernel": [13, 32]
+        },
+        "out": {
+          "kernel": [32, 13]
+        },
+        "query": {
+          "kernel": [13, 32]
+        },
+        "value": {
+          "kernel": [13, 32]
+        }
+      },
+      "mlp": {
+        "wi_0": {
+          "kernel": [13, 73]
+        },
+        "wi_1": {
+          "kernel": [13, 73]
+        },
+        "wo": {
+          "kernel": [73, 13]
+        }
+      },
+      "pre_cross_attention_layer_norm": {
+        "scale": [13]
+      },
+      "pre_mlp_layer_norm": {
+        "scale": [13]
+      },
+      "pre_self_attention_layer_norm": {
+        "scale": [13]
+      },
+      "self_attention": {
+        "key": {
+          "kernel": [13, 32]
+        },
+        "out": {
+          "kernel": [32, 13]
+        },
+        "query": {
+          "kernel": [13, 32]
+        },
+        "value": {
+          "kernel": [13, 32]
+        }
+      }
+    },
+    "layers_1": {
+      "encoder_decoder_attention": {
+        "key": {
+          "kernel": [13, 32]
+        },
+        "out": {
+          "kernel": [32, 13]
+        },
+        "query": {
+          "kernel": [13, 32]
+        },
+        "value": {
+          "kernel": [13, 32]
+        }
+      },
+      "mlp": {
+        "wi_0": {
+          "kernel": [13, 73]
+        },
+        "wi_1": {
+          "kernel": [13, 73]
+        },
+        "wo": {
+          "kernel": [73, 13]
+        }
+      },
+      "pre_cross_attention_layer_norm": {
+        "scale": [13]
+      },
+      "pre_mlp_layer_norm": {
+        "scale": [13]
+      },
+      "pre_self_attention_layer_norm": {
+        "scale": [13]
+      },
+      "self_attention": {
+        "key": {
+          "kernel": [13, 32]
+        },
+        "out": {
+          "kernel": [32, 13]
+        },
+        "query": {
+          "kernel": [13, 32]
+        },
+        "value": {
+          "kernel": [13, 32]
+        }
+      }
+    },
+    "logits_dense": {
+      "kernel": [13, 32128]
+    },
+    "relpos_bias": {
+      "rel_embedding": [4, 32]
+    }
+  },
+  "encoder": {
+    "encoder_norm": {
+      "scale": [13]
+    },
+    "layers_0": {
+      "attention": {
+        "key": {
+          "kernel": [13, 32]
+        },
+        "out": {
+          "kernel": [32, 13]
+        },
+        "query": {
+          "kernel": [13, 32]
+        },
+        "value": {
+          "kernel": [13, 32]
+        }
+      },
+      "mlp": {
+        "wi_0": {
+          "kernel": [13, 73]
+        },
+        "wi_1": {
+          "kernel": [13, 73]
+        },
+        "wo": {
+          "kernel": [73, 13]
+        }
+      },
+      "pre_attention_layer_norm": {
+        "scale": [13]
+      },
+      "pre_mlp_layer_norm": {
+        "scale": [13]
+      }
+    },
+    "layers_1": {
+      "attention": {
+        "key": {
+          "kernel": [13, 32]
+        },
+        "out": {
+          "kernel": [32, 13]
+        },
+        "query": {
+          "kernel": [13, 32]
+        },
+        "value": {
+          "kernel": [13, 32]
+        }
+      },
+      "mlp": {
+        "wi_0": {
+          "kernel": [13, 73]
+        },
+        "wi_1": {
+          "kernel": [13, 73]
+        },
+        "wo": {
+          "kernel": [73, 13]
+        }
+      },
+      "pre_attention_layer_norm": {
+        "scale": [13]
+      },
+      "pre_mlp_layer_norm": {
+        "scale": [13]
+      }
+    },
+    "multimodal_relpos_bias": {
+      "rel_embedding": [4, 256]
+    },
+    "relpos_bias": {
+      "rel_embedding": [4, 32]
+    },
+    "frame_dense_embedder": {
+      "kernel": [3, 13]
+    },
+    "timestamps_embedder": {
+      "kernel": [1, 13]
+    }
+  },
+  "token_embedder": {
+    "embedding": [32128, 13]
+  }
+}

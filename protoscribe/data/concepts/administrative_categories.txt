@@ -1,0 +1,302 @@
+basin_NOUN
+bee_NOUN
+beer_NOUN
+beer_NOUN	ale_NOUN
+beer_NOUN	yeast_NOUN
+bird_NOUN
+bird_NOUN	falcon_NOUN
+bird_NOUN	feather_NOUN
+bird_NOUN	heron_NOUN
+bird_NOUN	owl_NOUN
+birth_NOUN
+block_NOUN
+boar_NOUN
+bow_NOUN
+bowl_NOUN
+bread_NOUN
+bread_NOUN	dough_NOUN
+bread_NOUN	loaf_NOUN
+building_NOUN
+bundle_NOUN
+canal_NOUN
+carry_VERB
+cat_NOUN
+cattle_NOUN
+cattle_NOUN	bull_NOUN
+cattle_NOUN	calf_NOUN
+cattle_NOUN	cow_NOUN
+ceremonial_ADJ
+ceremonial_ADJ	crown_NOUN
+chest_NOUN
+chicken_NOUN
+chicken_NOUN	chick_NOUN
+chicken_NOUN	hen_NOUN
+clay_NOUN
+clay_NOUN	brick_NOUN
+clay_NOUN	mud_NOUN
+clay_NOUN	tablet_NOUN
+cloth_NOUN
+cloth_NOUN	collar_NOUN
+cloth_NOUN	cotton_NOUN
+cloth_NOUN	flag_NOUN
+cloth_NOUN	fold_NOUN
+cloth_NOUN	linen_NOUN
+cloth_NOUN	pillow_NOUN
+cloth_NOUN	scarf_NOUN
+cloth_NOUN	sheet_NOUN
+cloth_NOUN	shirt_NOUN
+cloth_NOUN	silk_NOUN
+cloth_NOUN	skirt_NOUN
+cloth_NOUN	trousers_NOUN
+cloth_NOUN	umbrella_NOUN
+coffin_NOUN
+command_NOUN
+cone_NOUN
+container_NOUN
+container_NOUN	cup_NOUN
+container_NOUN	jar_NOUN
+container_NOUN	jug_NOUN
+container_NOUN	measure_NOUN
+container_NOUN	pot_NOUN
+container_NOUN	vessel_NOUN
+corner_NOUN
+dairy_NOUN
+dairy_NOUN	cheese_NOUN
+dairy_NOUN	milk_NOUN
+dairy_NOUN	yoghurt_NOUN
+dawn_NOUN
+death_NOUN
+decoration_NOUN
+decoration_NOUN	lipstick_NOUN
+decoration_NOUN	necklace_NOUN
+decoration_NOUN	powder_NOUN
+decoration_NOUN	soap_NOUN
+dog_NOUN
+dog_NOUN	bitch_NOUN
+dog_NOUN	puppy_NOUN
+duck_NOUN
+duck_NOUN	drake_NOUN
+egg_NOUN
+enclosure_NOUN
+fan_NOUN
+field_NOUN
+field_NOUN	land_NOUN
+fish_NOUN
+fishing_NOUN
+float_NOUN
+flower_NOUN
+flower_NOUN	bud_NOUN
+flower_NOUN	lily_NOUN
+flower_NOUN	lotus_NOUN
+fly_NOUN
+frog_NOUN
+fruit_NOUN
+fruit_NOUN	grape_NOUN
+fruit_NOUN	olive_ADJ
+fruit_NOUN	peach_NOUN
+furniture_NOUN
+furniture_NOUN	chair_NOUN
+furniture_NOUN	seat_NOUN
+furniture_NOUN	stool_NOUN
+furniture_NOUN	table_NOUN
+game_NOUN
+garment_NOUN
+god_NOUN
+goddess_NOUN
+goose_NOUN
+grain_NOUN
+grain_NOUN	barley_NOUN
+grain_NOUN	malt_NOUN
+grain_NOUN	rice_NOUN
+grain_NOUN	rye_NOUN
+grain_NOUN	seed_NOUN
+grain_NOUN	stack_NOUN
+grain_NOUN	wheat_NOUN
+horse_NOUN
+horse_NOUN	donkey_NOUN
+horse_NOUN	mare_NOUN
+horse_NOUN	pony_NOUN
+king_NOUN
+mammal_NOUN
+mammal_NOUN	elephant_NOUN
+mammal_NOUN	fox_NOUN
+mammal_NOUN	hare_NOUN
+mammal_NOUN	horn_NOUN
+mammal_NOUN	monkey_NOUN
+mammal_NOUN	rabbit_NOUN
+mammal_NOUN	skin_NOUN
+mammal_NOUN	wolf_NOUN
+man_NOUN
+meat_NOUN
+meat_NOUN	bone_NOUN
+meat_NOUN	chop_VERB
+meat_NOUN	flesh_NOUN
+meat_NOUN	rib_NOUN
+meat_NOUN	steak_NOUN
+metal_NOUN
+metal_NOUN	bronze_NOUN
+metal_NOUN	copper_NOUN
+metal_NOUN	gold_NOUN
+metal_NOUN	mercury_NOUN
+metal_NOUN	silver_NOUN
+moon_NOUN
+mummy_NOUN
+nurse_NOUN
+nut_NOUN
+nut_NOUN	chestnut_NOUN
+nut_NOUN	walnut_NOUN
+offering_NOUN
+oil_NOUN
+pig_NOUN
+pile_NOUN
+plant_NOUN
+play_NOUN
+pregnant_ADJ
+prince_NOUN
+queen_NOUN
+recreation_NOUN
+recreation_NOUN	harp_NOUN
+reed_NOUN
+reed_NOUN	rush_NOUN
+reed_NOUN	stem_NOUN
+ring_NOUN
+roll_NOUN
+root_NOUN
+root_NOUN	carrot_NOUN
+root_NOUN	ginger_NOUN
+root_NOUN	potato_NOUN
+root_NOUN	vine_NOUN
+rope_NOUN
+rope_NOUN	basket_NOUN
+rope_NOUN	coil_NOUN
+rope_NOUN	cord_NOUN
+rope_NOUN	knot_NOUN
+rope_NOUN	net_NOUN
+rope_NOUN	strap_NOUN
+rope_NOUN	whip_NOUN
+sheep_NOUN
+sheep_NOUN	goat_NOUN
+sheep_NOUN	kid_NOUN
+sheep_NOUN	lamb_NOUN
+sheep_NOUN	ram_NOUN
+shell_NOUN
+sit_VERB
+smoke_NOUN
+snail_NOUN
+snake_NOUN
+star_NOUN
+stone_NOUN
+stone_NOUN	diamond_NOUN
+stone_NOUN	granite_NOUN
+stone_NOUN	jade_NOUN
+stone_NOUN	marble_NOUN
+stone_NOUN	ruby_NOUN
+stone_NOUN	sandstone_NOUN
+structure_NOUN
+structure_NOUN	booth_NOUN
+structure_NOUN	column_NOUN
+structure_NOUN	dome_NOUN
+structure_NOUN	door_NOUN
+structure_NOUN	fence_NOUN
+structure_NOUN	fort_NOUN
+structure_NOUN	gate_NOUN
+structure_NOUN	gateway_NOUN
+structure_NOUN	hall_NOUN
+structure_NOUN	house_NOUN
+structure_NOUN	palace_NOUN
+structure_NOUN	platform_NOUN
+structure_NOUN	pyramid_NOUN
+structure_NOUN	shelter_NOUN
+structure_NOUN	shrine_NOUN
+structure_NOUN	village_NOUN
+structure_NOUN	wall_NOUN
+sun_NOUN
+support_NOUN
+swallow_VERB
+terrain_NOUN
+terrain_NOUN	hill_NOUN
+terrain_NOUN	moor_NOUN
+terrain_NOUN	mound_NOUN
+terrain_NOUN	mountain_NOUN
+terrain_NOUN	sand_NOUN
+terrain_NOUN	slope_NOUN
+text_NOUN
+thorn_NOUN
+throne_NOUN
+tool_NOUN
+tool_NOUN	axe_NOUN
+tool_NOUN	broom_NOUN
+tool_NOUN	crook_NOUN
+tool_NOUN	drill_NOUN
+tool_NOUN	hammer_NOUN
+tool_NOUN	mortar_NOUN
+tool_NOUN	pen_NOUN
+tool_NOUN	pick_NOUN
+tool_NOUN	scale_NOUN
+tool_NOUN	seal_NOUN
+transportation_NOUN
+transportation_NOUN	boat_NOUN
+transportation_NOUN	canoe_NOUN
+transportation_NOUN	cart_NOUN
+transportation_NOUN	mast_NOUN
+transportation_NOUN	rudder_NOUN
+transportation_NOUN	sail_NOUN
+transportation_NOUN	ship_NOUN
+transportation_NOUN	wheel_NOUN
+trap_NOUN
+tree_NOUN
+tree_NOUN	branch_NOUN
+tree_NOUN	palm_NOUN
+trunk_NOUN
+vase_NOUN
+vegetable_NOUN
+vegetable_NOUN	bean_NOUN
+vegetable_NOUN	cabbage_NOUN
+vegetable_NOUN	lettuce_NOUN
+vegetable_NOUN	mustard_NOUN
+water_NOUN
+water_NOUN	ink_NOUN
+water_NOUN	lake_NOUN
+water_NOUN	pool_NOUN
+water_NOUN	rain_NOUN
+water_NOUN	river_NOUN
+water_NOUN	sea_NOUN
+water_NOUN	wave_NOUN
+weapon_NOUN
+weapon_NOUN	arrow_NOUN
+weapon_NOUN	blade_NOUN
+weapon_NOUN	club_NOUN
+weapon_NOUN	dagger_NOUN
+weapon_NOUN	knife_NOUN
+weapon_NOUN	shield_NOUN
+weapon_NOUN	sword_NOUN
+wig_NOUN
+wine_NOUN
+wine_NOUN	vinegar_NOUN
+woman_NOUN
+wood_NOUN
+wood_NOUN	apple_NOUN
+wood_NOUN	beech_NOUN
+wood_NOUN	birch_NOUN
+wood_NOUN	board_NOUN
+wood_NOUN	cherry_NOUN
+wood_NOUN	log_NOUN
+wood_NOUN	oak_NOUN
+wood_NOUN	pine_NOUN
+wood_NOUN	plank_NOUN
+wood_NOUN	pole_NOUN
+wood_NOUN	staff_NOUN
+wood_NOUN	stick_NOUN
+worker_NOUN
+worker_NOUN	baker_NOUN
+worker_NOUN	brewer_NOUN
+worker_NOUN	carpenter_NOUN
+worker_NOUN	carter_NOUN
+worker_NOUN	cook_NOUN
+worker_NOUN	farmer_NOUN
+worker_NOUN	fisherman_NOUN
+worker_NOUN	mason_NOUN
+worker_NOUN	official_NOUN
+worker_NOUN	servant_NOUN
+worker_NOUN	shepherd_NOUN
+worker_NOUN	soldier_NOUN

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3020px" height="620px" viewBox="0 0 3020.0 620.0" style="enable-background:new 0 0 3020.0 620.0">
+  <g transform="translate(0 100) rotate(0) scale(62.5)"><path d="M1.41 0l-1.41 1.41.72.72 1.78 1.81-1.78 1.78-.72.69 1.41 1.44.72-.72 1.81-1.81 1.78 1.81.69.72 1.44-1.44-.72-.69-1.81-1.78 1.81-1.81.72-.72-1.44-1.41-.69.72-1.78 1.78-1.81-1.78-.72-.72z" fill="#000000" position_and_glyph="0,X" transform="translate(0 100) rotate(0) scale(62.5)" />
+</g><g transform="translate(500.0 100) rotate(0) scale(62.5)"><path d="M1.41 0l-1.41 1.41.72.72 1.78 1.81-1.78 1.78-.72.69 1.41 1.44.72-.72 1.81-1.81 1.78 1.81.69.72 1.44-1.44-.72-.69-1.81-1.78 1.81-1.81.72-.72-1.44-1.41-.69.72-1.78 1.78-1.81-1.78-.72-.72z" fill="#000000" position_and_glyph="1,X" transform="translate(500.0 100) rotate(0) scale(62.5)" />
+</g><g transform="translate(1000.0 100) rotate(0) scale(3.90625)"><path d="M76.32 16.27H51.68c-1.29 0-2.33 1.05-2.33 2.33v99.96c0 1.29 1.04 2.33 2.33 2.33h24.64c1.29 0 2.33-1.04 2.33-2.33V18.6c0-1.28-1.04-2.33-2.33-2.33z" fill="#000000" position_and_glyph="2,I" transform="translate(1000.0 100) rotate(0) scale(3.90625)" /></g><g transform="translate(1500.0 100) rotate(0) scale(3.90625)"><path d="M76.32 16.27H51.68c-1.29 0-2.33 1.05-2.33 2.33v99.96c0 1.29 1.04 2.33 2.33 2.33h24.64c1.29 0 2.33-1.04 2.33-2.33V18.6c0-1.28-1.04-2.33-2.33-2.33z" fill="#000000" position_and_glyph="3,I" transform="translate(1500.0 100) rotate(0) scale(3.90625)" /></g><g transform="translate(2000.0 100) rotate(0) scale(15.625)"><style type="text/css" fill="#000000">
+	.st0{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st1{fill:none;stroke:#000000;stroke-width:2;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st2{fill:none;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-miterlimit:10;}
+</style>
+<rect x="11" y="13" class="st0" width="10" height="6" fill="#000000" position_and_glyph="4,clay" transform="translate(2000.0 100) rotate(0) scale(15.625)" />
+<rect x="21" y="13" class="st0" width="10" height="6" fill="#000000" position_and_glyph="4,clay" transform="translate(2000.0 100) rotate(0) scale(15.625)" />
+<rect x="1" y="13" class="st0" width="10" height="6" fill="#000000" position_and_glyph="4,clay" transform="translate(2000.0 100) rotate(0) scale(15.625)" />
+<rect x="16" y="19" class="st0" width="10" height="6" fill="#000000" position_and_glyph="4,clay" transform="translate(2000.0 100) rotate(0) scale(15.625)" />
+<rect x="6" y="19" class="st0" width="10" height="6" fill="#000000" position_and_glyph="4,clay" transform="translate(2000.0 100) rotate(0) scale(15.625)" />
+<rect x="16" y="7" class="st0" width="10" height="6" fill="#000000" position_and_glyph="4,clay" transform="translate(2000.0 100) rotate(0) scale(15.625)" />
+<rect x="6" y="7" class="st0" width="10" height="6" fill="#000000" position_and_glyph="4,clay" transform="translate(2000.0 100) rotate(0) scale(15.625)" />
+</g><g transform="translate(2500.0 100) rotate(0) scale(8.333333333333334)"><path d="M59.967,16.577c-0.003-0.012-0.01-0.022-0.014-0.034c-0.022-0.072-0.049-0.142-0.086-0.207  c-0.015-0.027-0.037-0.049-0.055-0.075c-0.032-0.045-0.063-0.091-0.102-0.131c-0.026-0.026-0.057-0.047-0.086-0.07  c-0.032-0.026-0.061-0.056-0.097-0.079c-0.008-0.005-0.018-0.007-0.026-0.012c-0.008-0.005-0.014-0.012-0.023-0.017l-18-9.831  c-0.292-0.159-0.642-0.164-0.938-0.011l-40,20.644c-0.014,0.007-0.024,0.019-0.037,0.027c-0.016,0.009-0.035,0.014-0.051,0.025  c-0.03,0.02-0.054,0.046-0.081,0.069c-0.027,0.022-0.055,0.043-0.08,0.068c-0.04,0.04-0.073,0.085-0.105,0.131  C0.169,27.1,0.149,27.123,0.133,27.15c-0.034,0.06-0.059,0.124-0.08,0.19c-0.006,0.018-0.015,0.033-0.02,0.051  C0.012,27.473,0,27.558,0,27.644v16.712c0,0.392,0.229,0.748,0.586,0.91l19,8.644c0.015,0.007,0.032,0.004,0.047,0.01  C19.751,53.968,19.874,54,20,54c0.088,0,0.175-0.014,0.26-0.037c0.028-0.008,0.053-0.021,0.081-0.031  c0.041-0.015,0.084-0.026,0.123-0.047l39-20.441C59.794,33.272,60,32.931,60,32.559V16.831C60,16.744,59.989,16.659,59.967,16.577z   M40.986,8.132l15.841,8.652L19.976,34.897L3.32,27.572L40.986,8.132z M2,29.209l17,7.873v14.365L2,43.712V29.209z M21,51.347V37.16  l37-18.703v13.497L21,51.347z" fill="#000000" position_and_glyph="5,brick" transform="translate(2500.0 100) rotate(0) scale(8.333333333333334)" />
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+<g fill="#000000">
+</g>
+</g></svg>

@@ -1,0 +1,5 @@
+{
+  "rel_embedding_x": ["float32", "relpos_heads=3", "relpos_buckets=12"],
+  "rel_embedding_y": ["float32", "relpos_heads=3", "relpos_buckets=12"],
+  "rel_embedding": ["float32", "relpos_heads=3", "relpos_buckets=12"]
+}

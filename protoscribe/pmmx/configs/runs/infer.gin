@@ -1,0 +1,60 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Defaults for infer.py.
+#
+# You must also include a binding for MODEL.
+#
+# Required to be set:
+#
+# - MIXTURE_OR_TASK_NAME: The SeqIO Task/Mixture to use for inference
+# - TASK_FEATURE_LENGTHS: The lengths per key in the SeqIO Task to trim features
+#                         to.
+# - CHECKPOINT_PATH: The model checkpoint to use for inference
+# - INFER_OUTPUT_DIR: The dir to write results to. When launching using
+#                     XManager, this is set automatically.
+#
+
+from __gin__ import dynamic_registration
+
+import __main__ as infer_script
+from protoscribe.pmmx.utils import partitioning_utils
+from t5x import partitioning
+from t5x import utils
+
+include 't5x/configs/runs/infer.gin'
+
+partitioning.PjitPartitioner:
+  num_partitions = 1
+  logical_axis_rules = @partitioning.standard_logical_axis_rules()
+
+partitioning.standard_logical_axis_rules:
+  additional_rules = @partitioning_utils.additional_axis_rules()
+
+# Must be overridden
+MIXTURE_OR_TASK_NAME = %gin.REQUIRED
+TASK_FEATURE_LENGTHS = %gin.REQUIRED
+CHECKPOINT_PATH = %gin.REQUIRED
+INFER_OUTPUT_DIR = %gin.REQUIRED
+BATCH_SIZE = %gin.REQUIRED
+
+utils.DatasetConfig:
+  batch_size = %BATCH_SIZE
+
+# No falling back to scratch for inference.
+utils.RestoreCheckpointConfig.fallback_to_scratch = False
+
+infer_script.infer:
+  checkpoint_period = 10  # this greatly alleviates container OOM
+  checkpoint_ds_iter = False  # Failed to serialize tensor data of size 13006073943

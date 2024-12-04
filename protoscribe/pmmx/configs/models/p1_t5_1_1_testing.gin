@@ -1,0 +1,56 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# PMMX-One (P1) Tiny version for unit tests.
+# Provides MODEL
+# ginlint: disable=bad-import-order
+from __gin__ import dynamic_registration
+
+import seqio
+from protoscribe.pmmx import pmmx_architecture
+from flaxformer.components import embedding
+
+include 'protoscribe/pmmx/configs/architectures/p1_t5_1_1_flaxformer.gin'
+include 'protoscribe/pmmx/configs/models/p1_t5_1_1_base.gin'  # imports vocab, optimizer and model.
+
+# Architecture overrides
+NUM_HEADS = 4
+NUM_LAYERS = 1
+HEAD_DIM = 8
+EMBED_DIM = 7
+MLP_DIM = 11
+
+# Overrides for testing
+DROPOUT_RATE = 0.0
+VOCAB_SIZE = 2000
+
+pmmx_architecture.MultimodalEncoder:
+  sow_intermediates = True
+  modality_embedders_spec = {
+    'image_v2_dense': [
+        ('image_v2_dense', @pmmx_architecture.DenseEmbed)
+    ],
+    'image_v2_tokens': [
+        ('image_v2_tokens', @pmmx_architecture.MeanPoolingEmbed)
+    ],
+    'image_v1_dense': [
+        ('image_v1_dense', @pmmx_architecture.DenseEmbed)
+    ],
+    'text_tokens': [
+        # Add learned absolute position embeddings to the text_tokens. The
+        # `position_ids` will be taken from `text_tokens_position_ids`
+        # if packing is enabled, otherwise from the range (0, 1, ..., seq_len).
+        ('position_ids', @token_position_embedder/embedding.Embed)
+    ],
+  }

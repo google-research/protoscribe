@@ -1,0 +1,318 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Flaxformer implementation of PMMX-One (p1), based on T5 (1.1) arch.
+#
+# Required to be overridden:
+#
+# - NUM_HEADS
+# - NUM_LAYERS
+# - HEAD_DIM
+# - EMBED_DIM
+# - MLP_DIM
+# ginlint: disable=bad-import-order
+from __gin__ import dynamic_registration
+
+from flax import linen
+from t5x import partitioning
+from t5x import utils
+from flaxformer.components.attention import dense_attention
+from flaxformer.components import dense
+from flaxformer.components import embedding
+from flaxformer.components import layer_norm
+from flaxformer.components import relative_position_biases
+from flaxformer.architectures.t5 import t5_architecture
+from protoscribe.pmmx import feature_converters
+from protoscribe.pmmx import pmmx_architecture
+from protoscribe.pmmx import multimodal_relative_position_biases
+
+# Must be overridden.
+NUM_HEADS = %gin.REQUIRED
+NUM_ENCODER_LAYERS = %gin.REQUIRED
+NUM_DECODER_LAYERS = %gin.REQUIRED
+HEAD_DIM = %gin.REQUIRED
+EMBED_DIM = %gin.REQUIRED
+MLP_DIM = %gin.REQUIRED
+TASK_FEATURE_LENGTHS = %gin.REQUIRED
+
+NUM_ENCODER_LAYERS = %NUM_LAYERS
+NUM_DECODER_LAYERS = %NUM_LAYERS
+
+# Constants (may be overridden)
+ACTIVATION_DTYPE = 'float32'
+ACTIVATION_PARTITIONING_DIMS = 1
+PARAMETER_PARTITIONING_DIMS = 1
+NUM_EMBEDDINGS = 32128  # vocab size rounded to a multiple of 128 for TPU efficiency
+SCALE = 1.0
+DROPOUT_RATE = 0.0
+MAX_NUM_MODALITIES = 16
+
+# Relative position bias module
+ENCODER_RELATIVE_POSITION_BIAS_FACTORY = @relative_position_biases.RelativePositionBiases
+
+# Macros
+BIAS_INIT = @bias_init/linen.initializers.normal()
+bias_init/linen.initializers.normal.stddev = 1e-6
+DROPOUT_FACTORY = @dropout_factory/linen.Dropout
+dropout_factory/linen.Dropout:
+  rate = %DROPOUT_RATE
+  broadcast_dims = (-2,)
+
+# Architecture (Flax Module)
+ARCHITECTURE = @pmmx_architecture.MultimodalEncoderDecoder()
+pmmx_architecture.MultimodalEncoderDecoder:
+  encoder_factory = @pmmx_architecture.MultimodalEncoder
+  decoder_factory = @t5_architecture.Decoder
+  shared_token_embedder_factory = @token_embedder/embedding.Embed
+  dtype = %ACTIVATION_DTYPE
+
+# Infer the input features from the TASK_FEATURE_LENGTHS passed by the user.
+feature_converters.MultimodalEncDecFeatureConverterFactory:
+  task_feature_lengths = %TASK_FEATURE_LENGTHS
+  ########### PER-MODALITY FEATURE SPECS ############
+  # If you are adding a new modality, declare its dtype and rank here or
+  # override it in your gin file. Remember to update the following files:
+  # - protoscribe/pmmx/pmmx_architecture.py (declare a factory)
+  # - t5x/partitioning.py (add a rule)
+  feature_specs = (
+      ("text_tokens", 'int32', 1),
+      ("text_dense", 'float32', 2),
+      ("image_v2_dense", 'float32', 2),
+      ("image_v2_obj_dense", 'float32', 2),
+      ("image_v2_tokens", 'int32', 2),
+      ("image_v1_dense", 'float32', 2)
+  )
+  ########### END PER-MODALITY FEATURE SPECS ##############
+
+# Encoder
+pmmx_architecture.MultimodalEncoder:
+  num_layers = %NUM_ENCODER_LAYERS
+
+  ############ FEATURES AND MODALITIES #############
+  # Defines the features, modalities, and embeddings
+  #
+  # If you are adding a new feature or modality, you must also update:
+  # - t5x/partitioning.py
+  #
+  # Feature modality mapping:
+  #  ((feature0, modality0), (feature1, modality1), ...)
+  feature_spec = (('text_tokens', 'text_tokens'), ('image_v2_dense', 'image_v2_dense'),
+                  ('image_v2_tokens', 'image_v2_tokens'), ('image_v1_dense', 'image_v1_dense'),
+                  ('text_dense','text_dense'),
+                  ('image_v2_obj_dense', 'image_v2_obj_dense'))
+  # Modality sequence **append-only**:
+  #  (modality0, modality1, ...)
+  modality_spec = ('text_tokens', 'image_v2_dense', 'image_v2_tokens', 'image_v1_dense',
+                   'text_dense', 'image_v2_obj_dense')
+  # Embedders for each modality:
+  #  modality: [(feature1, embedder1), (feature2, embedder2), ...]
+  # The `text_tokens` modality uses a `shared_token_embedder`, which is
+  # constructed by `MultimodalEncoderDecoder`, so it has no entry here.
+  modality_embedders_spec = {
+    'image_v2_dense': [
+        ('image_v2_dense', @pmmx_architecture.DenseEmbed)
+    ],
+    'image_v2_tokens': [
+        ('image_v2_tokens', @pmmx_architecture.MeanPoolingEmbed)
+    ],
+    'image_v1_dense': [
+        ('image_v1_dense', @pmmx_architecture.DenseEmbed)
+    ],
+    'text_dense': [
+        ('text_dense', @pmmx_architecture.DenseEmbed)
+    ],
+    'image_v2_obj_dense': [
+        ('image_v2_obj_dense', @pmmx_architecture.DenseEmbed)
+    ],
+  }
+  ############## END FEATURES AND MODALITIES ###############
+
+  layer_factory = @pmmx_architecture.MultimodalEncoderLayer
+  input_dropout_factory = %DROPOUT_FACTORY
+  output_dropout_factory = %DROPOUT_FACTORY
+  layer_norm_factory = @layer_norm.T5LayerNorm
+  shared_relative_position_bias_factory = %ENCODER_RELATIVE_POSITION_BIAS_FACTORY
+  shared_multimodal_relative_position_bias_factory = @multimodal_relative_position_biases.MultimodalRelativePositionBiases
+  dtype = %ACTIVATION_DTYPE
+
+# Encoder Layer
+pmmx_architecture.MultimodalEncoderLayer:
+  attention = @dense_attention.MultiHeadDotProductAttention()
+  mlp = @dense.MlpBlock()
+  dropout_factory = %DROPOUT_FACTORY
+  layer_norm_factory = @layer_norm.T5LayerNorm
+  activation_partitioning_dims = %ACTIVATION_PARTITIONING_DIMS
+
+# Decoder
+t5_architecture.Decoder:
+  num_layers = %NUM_DECODER_LAYERS
+  layer_factory = @t5_architecture.DecoderLayer
+  dropout_factory = %DROPOUT_FACTORY
+  layer_norm_factory = @layer_norm.T5LayerNorm
+  position_embedder_factory = None
+  shared_relative_position_bias_factory = @relative_position_biases.RelativePositionBiases
+  output_logits_factory = @output_logits/dense.DenseGeneral
+  dtype = %ACTIVATION_DTYPE
+
+# Decoupled embedding
+output_logits/dense.DenseGeneral:
+  features = %NUM_EMBEDDINGS
+  use_bias = False
+  dtype = 'float32'
+  kernel_init = @output_logits_kernel_init/linen.initializers.variance_scaling()
+  bias_init = %BIAS_INIT
+  kernel_axis_names = ['embed', 'vocab']
+output_logits_kernel_init/linen.initializers.variance_scaling:
+  scale = %SCALE
+  mode = 'fan_in'
+  distribution = 'truncated_normal'
+
+# Decoder Layer
+t5_architecture.DecoderLayer:
+  self_attention = @dense_attention.MultiHeadDotProductAttention()
+  encoder_decoder_attention = @dense_attention.MultiHeadDotProductAttention()
+  mlp = @dense.MlpBlock()
+  dropout_factory = %DROPOUT_FACTORY
+  layer_norm_factory = @layer_norm.T5LayerNorm
+  activation_partitioning_dims = %ACTIVATION_PARTITIONING_DIMS
+
+# Token Embedder (shared)
+token_embedder/embedding.Embed:
+  num_embeddings= %NUM_EMBEDDINGS
+  features = %EMBED_DIM
+  cast_input_dtype = 'int32'
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @token_embedder_init/linen.initializers.normal()
+  one_hot = True
+  name = 'token_embedder'
+token_embedder_init/linen.initializers.normal.stddev = 1.0
+
+# Token position Embedder (shared)
+token_position_embedder/embedding.Embed:
+  num_embeddings = 512  # max seq length
+  features = %EMBED_DIM
+  cast_input_dtype = 'int32'
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @token_position_embedder/embedding_init/linen.initializers.normal()
+  one_hot = True
+  name = 'token_position_embedder'
+token_position_embedder/embedding_init/linen.initializers.normal.stddev = 1.0
+
+# Image_V2 position Embedder (shared)
+image_v2_dense_position_embedder/embedding.Embed:
+  num_embeddings = 512  # max seq length
+  features = %EMBED_DIM
+  cast_input_dtype = 'int32'
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @image_v2_dense_position_embedder/embedding_init/linen.initializers.normal()
+  one_hot = True
+  name = 'image_v2_dense_position_embedder'
+image_v2_dense_position_embedder/embedding_init/linen.initializers.normal.stddev = 1.0
+
+# dense embedder
+pmmx_architecture.DenseEmbed:
+  features = %EMBED_DIM
+  use_bias = False
+  dtype = %ACTIVATION_DTYPE
+  kernel_init = @dense_embed_kernel_init/linen.initializers.variance_scaling()
+  kernel_axis_names = ['vocab', 'embed']
+dense_embed_kernel_init/linen.initializers.variance_scaling:
+  scale = %SCALE
+  mode = 'fan_out'
+  distribution = 'truncated_normal'
+
+# Image_v2 Token Embedder
+pmmx_architecture.MeanPoolingEmbed:
+  num_embeddings = 8193  # add 1 for pad token (cc12m is missing some tokens)
+  features = %EMBED_DIM
+  cast_input_dtype = 'int32'
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @image_v2_tokens_embedder_init/linen.initializers.normal()
+  one_hot = True
+  # name = 'image_v2_tokens_embedder_z'
+image_v2_tokens_embedder_init/linen.initializers.normal.stddev = 1.0
+
+# Image_v1 position Embedder (shared)
+image_v1_dense_position_embedder/embedding.Embed:
+  num_embeddings = 512  # max seq length
+  features = %EMBED_DIM
+  cast_input_dtype = 'int32'
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @image_v1_dense_position_embedder/embedding_init/linen.initializers.normal()
+  one_hot = True
+  name = 'image_v1_dense_position_embedder'
+image_v1_dense_position_embedder/embedding_init/linen.initializers.normal.stddev = 1.0
+
+# Attention (encoder, decoder, self-attention)
+dense_attention.MultiHeadDotProductAttention:
+  num_heads = %NUM_HEADS
+  dtype = %ACTIVATION_DTYPE
+  head_dim = %HEAD_DIM
+  kernel_init =  @attention_kernel_init/linen.initializers.variance_scaling()
+  bias_init = %BIAS_INIT
+  use_bias = False
+  broadcast_dropout = True
+  dropout_rate = %DROPOUT_RATE
+attention_kernel_init/linen.initializers.variance_scaling:
+  scale = %SCALE
+  mode = 'fan_in'
+  distribution = 'normal'
+
+# Relative position biases (encoder, decoder)
+relative_position_biases.RelativePositionBiases:
+  num_heads = %NUM_HEADS
+  dtype = %ACTIVATION_DTYPE
+  num_buckets = 32
+  max_distance = 128
+  embedding_init = @relative_position_bias_init/linen.initializers.variance_scaling()
+relative_position_bias_init/linen.initializers.variance_scaling:
+  scale = %SCALE
+  mode = 'fan_avg'
+  distribution = 'uniform'
+
+# Multimodal relative position biases
+multimodal_relative_position_biases.MultimodalRelativePositionBiases:
+  dtype = %ACTIVATION_DTYPE
+  num_heads = %NUM_HEADS
+  max_num_modalities = %MAX_NUM_MODALITIES
+  embedding_init = @multimodal_relative_position_bias_init/linen.initializers.variance_scaling()
+multimodal_relative_position_bias_init/linen.initializers.variance_scaling:
+  scale = %SCALE
+  mode = 'fan_avg'
+  distribution = 'uniform'
+
+# MLP (encoder, decoder)
+dense.MlpBlock:
+  use_bias = False
+  intermediate_dim = %MLP_DIM
+  activations = ('gelu', 'linear')
+  kernel_init = @mlp_kernel_init/linen.initializers.variance_scaling()
+  bias_init = %BIAS_INIT
+  intermediate_dropout_rate = %DROPOUT_RATE
+  final_dropout_rate = 0  # Zero to be consistent with earlier configdict setup.
+  dtype = %ACTIVATION_DTYPE
+mlp_kernel_init/linen.initializers.variance_scaling:
+  scale = %SCALE
+  mode = 'fan_in'
+  distribution = 'truncated_normal'
+
+layer_norm.T5LayerNorm.dtype = %ACTIVATION_DTYPE
+
+partitioning.standard_logical_axis_rules:
+  parameter_partitioning_dims = %PARAMETER_PARTITIONING_DIMS

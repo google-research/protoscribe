@@ -1,0 +1,58 @@
+Top Category	Subcategory	Particular instances or related categories
+livestock	cattle	bull, cow, heifer, milch cow, calf, bullock, ox
+	swine	boar, sow, hog, piglet, wild boar
+	sheep	goat, ram, ewe, lamb, billy goat, nanny goat, kid
+	horse	mare, stallion, donkey, mule, foal, pony
+	chicken	rooster, hen, chick, guinea fowl
+	duck	drake, duckling
+	goose	gander, gosling
+	dog	bitch, mutt, puppy, 
+	cat	tomcat
+	egg	chicken egg, duck egg, goose egg, eggwhite, yolk, shell
+	dairy	milk, goat milk, sheep milk, cow milk, yogurt, yoghurt, cheese, whey, curds
+	meat	steak, chop, rib, bone, cartilage, flesh
+		
+wild animal	mollusk	snail, shell
+	arthropod	scarab, bee, beetle, centipede, fly, locust, scorpion
+	reptile, amphibian	tortoise, viper, cobra, crocodile, frog, gecko, snake, tadpole
+	bird	wild goose, wild duck, vulture, buzzard, cormorant, egret, falcon, feather, flamingo, ibis, heron, hoopoe, lapwing, ostrich, owl, pintail, plover, quail, sparrow, stork, widgeon
+	mammal	wolf, fox, jackal, babboon, monkey, elephant, gazelle, giraffe, hare, rabbit, ibex, oryx, skin, tusk, horn
+	fish	barbel, catfish, mullet, pufferfish,
+		
+plants	grain	wheat, barley, rice, emmer, sorghum, rye, buckwheat, malt, germ, seed, stack
+	vegetable	cabbage, mustard, lettuce, spinach, bean, flax
+	stem, root	taro, yam, potato, sweet potato, carrot, radish, ginger, vine
+	tree	pine, cedar, spruce, fir, palm, birch, beech, oak, elm, cherry tree, apple tree, pear tree, branch
+	reed	stem, papyrus, rush, sedge
+	fruit	pear, apple, peach, persimmon, grape, melon, pumpkin, olive
+	nut	walnut, hazelnut, chestnut
+	bread	dough, yeast, pita, leavened bread, loaf
+	beer	ale, yeast, fermentation
+	wine	white wine, red wine, vinegar
+	oil	olive oil, palm oil, bean oil
+	decoration	powder, eye color, lipstick, soap, softener, necklace, makeup
+	flower	bud, lily, lotus
+		
+resources	wood	pine, cedar, spruce, fir, birch, beech, oak, elm, cherry, apple, pear, board, log, stick, pole , plank, crook, staff
+	stone	sandstone, marble, granite, basalt, schist, soapstone, jade, quartz, ruby, diamond, sapphire, emerald
+	clay	brick, mud, tablet
+	water	river, lake, rain, pool, sea, ink, wave
+	cloth	silk, linen, cotton, shirt, skirt, trousers, flag, fold, pillow, scarf, sheet, umbrella, collar, head covering
+	rope	cord, net, tether, whip, basket, bowstring, coil, flagellum, knot, lasso, sandal, strap, wick
+	metal	gold, silver, copper, bronze, mercury, ingot
+		
+implements	tool	awl, hammer, chisel, axe, plow, hoe, broom, stylus, censer, crook, drill, harpoon, ladle, mortar, pestle, pen, pick, pitchfork, plummet, plumbline, scale, seal, sharpener, sickle
+	weapon	weapon, knife, sword, blade, shield, arrow, arrowhead, club, dagger
+	transportation	wheel, cart, chariot, sled, boat, ship, canoe, oar, mast, mooring post, rudder, sail
+	structure	fort, gateway, hall, door bolt, booth, column, dome, door, fence, gate, house, kiln, obelisk, palace, pedestal, pyramid, platform, shelter, shrine, stair, stela, village, wall
+	container	jug, cup, jar, measure, pot, vessel, waterskin
+		
+manufactured items	furniture	seat, chair, stool, table
+	recreation	game board, game piece, harp
+	funerary	coffin, mummy, sarcophagus
+	ceremonial	crown, scepter, scimitar
+		
+land	field	plot of land, irrigation canal, furrow,  land
+	terrain	hill, moor, slope, mound, mountain, sand
+		
+human	worker	farmer, fisherman, shopkeeper, scribe, official, carter, shepherd, cowherd, swineherd, baker, brewer, cook, vintner, carpenter, mason, sweeper, soldier, servant

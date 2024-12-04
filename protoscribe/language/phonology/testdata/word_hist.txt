@@ -1,0 +1,392 @@
+  45471 o
+  10231 w a j
+  10191 t i m
+  10166 m ə a
+  10104 s u p
+  10088 s a j
+  10077 o w
+  10015 e
+  10004 i j
+   4987 u m
+    449 a b i s
+    354 u i s
+    326 n e i s
+    321 o i s
+    321 n i i s
+    320 m e i s
+    314 i i s
+    313 t o i s
+    309 t i i s
+    309 p u i s
+    303 k u i s
+    302 e i s
+    301 u z i s
+    301 a i s
+    296 w e i s
+    287 k o i s
+    261 a m i s
+    260 m o i s
+    258 j a i s
+    241 o z i s
+    239 t u i s
+    236 o b i s
+    222 k a i s
+    219 o ɡ i s
+    217 b u i s
+    211 n u i s
+    209 t a i s
+    201 k i i s
+    200 u m i s
+    200 e b i s
+    198 b o i s
+    195 i n i s
+    194 j o i s
+    192 w u i s
+    192 o n i s
+    191 w i i s
+    190 b i i s
+    189 w a i s
+    188 b a i s
+    187 i b i s
+    185 s i i s
+    181 k e i s
+    180 i z i s
+    177 p e i s
+    177 e m i s
+    176 m i i s
+    146 u ɡ i s
+    146 o w i s
+    146 e d i s
+    141 b e i s
+    137 e n i s
+    136 p i i s
+    134 e w i s
+    133 u w i s
+    132 i d i s
+    131 t e i s
+    130 j u i s
+    127 j i i s
+    126 j e i s
+    124 s a i s
+    123 p a i s
+    121 s e i s
+    121 m u i s
+    120 w o i s
+    118 a z i s
+    101 n o i s
+     76 n a i s
+     72 e z i s
+     70 a n i s
+     66 u d i s
+     65 u b i s
+     62 i w i s
+     61 s o i s
+     60 p o i s
+     58 s u i s
+     58 i m i s
+     57 e j i s
+     55 i ɡ i s
+     53 m a i s
+     52 o j i s
+     48 a j i s
+      8 t i u t
+      7 n e
+      6 j o u t
+      6 b a u t
+      6 a u t
+      5 t o
+      5 p u u t
+      5 n u
+      5 n o m
+      5 n i u t
+      5 m e
+      5 e m u t
+      5 b ə o
+      4 w e
+      4 u z u t
+      4 u s
+      4 t ə n u
+      4 s ə o
+      4 o w u t
+      4 o n u t
+      4 n ə p e
+      4 n ə b e
+      4 n e u t
+      4 m e u t
+      4 k u u t
+      4 k i
+      4 j o
+      4 i n u t
+      4 i
+      4 b u u t
+      4 b ə b o
+      3 w e j
+      3 w a u t
+      3 t u t
+      3 t ə b o
+      3 p u m
+      3 p u
+      3 p a m
+      3 p a k
+      3 o z u t
+      3 o u t
+      3 o s
+      3 n i
+      3 n ə p i
+      3 n ə i s
+      3 n ə e
+      3 m i
+      3 m ə o
+      3 m ə e b
+      3 k u
+      3 k o
+      3 k i u t
+      3 k ə e
+      3 k e
+      3 j o w
+      3 i u t
+      3 e u t
+      3 e t
+      3 e p
+      3 e n
+      3 e j u t
+      3 b ə u b
+      3 b ə m o
+      3 b ə j i
+      3 b ə i
+      3 b ə b e
+      3 a m
+      3 a b
+      3 a
+      2 w u
+      2 w o u t
+      2 w a b
+      2 w a
+      2 u u t
+      2 u m u t
+      2 u ɡ u t
+      2 u d u t
+      2 u
+      2 t u u t
+      2 t u
+      2 t o u t
+      2 t i
+      2 t ə u
+      2 t ə a t
+      2 s o u t
+      2 s o p
+      2 s ə u
+      2 s ə t o
+      2 s ə t a
+      2 s ə o p
+      2 s ə n e
+      2 s ə k o
+      2 s ə b o
+      2 s e u t
+      2 s e p
+      2 s a u t
+      2 s a
+      2 p i u t
+      2 p ə n e
+      2 p ə i t
+      2 p ə a
+      2 o n
+      2 o b u t
+      2 n o k
+      2 n ə w o
+      2 n ə u
+      2 n ə n i
+      2 n ə n e
+      2 n ə i m
+      2 m o u t
+      2 m o
+      2 m i b
+      2 m ə w e
+      2 m ə u m
+      2 m ə s i
+      2 m ə j a
+      2 k o u t
+      2 k i k
+      2 k i b
+      2 k ə s u
+      2 k ə k i
+      2 k ə e k
+      2 k ə e b
+      2 k e u t
+      2 k a
+      2 j u b
+      2 j i k
+      2 j a j
+      2 i z u t
+      2 i s
+      2 i m
+      2 i b
+      2 e w
+      2 e n u t
+      2 e b u t
+      2 b o
+      2 b ə u s
+      2 b ə n a
+      2 b ə i b
+      2 b ə e k
+      2 b e
+      2 b a t
+      2 a s
+      2 a p
+      2 a m u t
+      2 a j u t
+      2 a j
+      1 w u u t
+      1 w u n
+      1 w u k
+      1 w o t
+      1 w o n
+      1 w o
+      1 w i u t
+      1 w i
+      1 w e u t
+      1 w e t
+      1 w e s
+      1 u w u t
+      1 u w
+      1 u t
+      1 u b u t
+      1 t u n
+      1 t o t
+      1 t ə w o
+      1 t ə u s
+      1 t ə p u
+      1 t ə j o
+      1 t ə a k
+      1 t e k
+      1 t e
+      1 t a w
+      1 t a u t
+      1 t a
+      1 s u u t
+      1 s o t
+      1 s i u t
+      1 s i
+      1 s ə t i
+      1 s ə s u
+      1 s ə p e
+      1 s ə p a
+      1 s ə n u
+      1 s ə n o
+      1 s ə k i
+      1 s ə i
+      1 s ə e w
+      1 s ə e n
+      1 s ə e m
+      1 s ə e b
+      1 s ə e
+      1 s ə b i
+      1 s e
+      1 p u k
+      1 p o p
+      1 p i w
+      1 p i
+      1 p ə u n
+      1 p ə s a
+      1 p ə p e
+      1 p ə o
+      1 p ə n i
+      1 p ə n a
+      1 p ə m e
+      1 p ə j o
+      1 p ə i s
+      1 p ə i b
+      1 p ə i
+      1 p ə e
+      1 p a u t
+      1 p a p
+      1 o k
+      1 o j u t
+      1 o j
+      1 n u u t
+      1 n u m
+      1 n i b
+      1 n ə w a
+      1 n ə s u
+      1 n ə i j
+      1 n ə i
+      1 n ə b a
+      1 n ə a p
+      1 n ə a n
+      1 n a k
+      1 n a
+      1 m u u t
+      1 m i u t
+      1 m i t
+      1 m ə u
+      1 m ə t o
+      1 m ə o t
+      1 m ə n o
+      1 m ə n e
+      1 m ə n a
+      1 m ə k i
+      1 m ə j u
+      1 m ə i w
+      1 m ə e
+      1 m ə b u
+      1 m e n
+      1 m a w
+      1 m a u t
+      1 m a s
+      1 k u b
+      1 k o t
+      1 k i m
+      1 k ə u b
+      1 k ə s o
+      1 k ə p u
+      1 k ə m o
+      1 k ə i
+      1 k ə a t
+      1 k e p
+      1 k a u t
+      1 k a s
+      1 j u p
+      1 j u
+      1 j o j
+      1 j i u t
+      1 j i t
+      1 j i
+      1 j e u t
+      1 j e
+      1 j a u t
+      1 j a m
+      1 j a b
+      1 j a
+      1 i n
+      1 i k
+      1 i ɡ u t
+      1 e w u t
+      1 e s
+      1 e m
+      1 e j
+      1 e d u t
+      1 b u w
+      1 b u s
+      1 b u
+      1 b o u t
+      1 b o s
+      1 b i j
+      1 b i
+      1 b ə w e
+      1 b ə t e
+      1 b ə s u
+      1 b ə k i
+      1 b ə i w
+      1 b ə i s
+      1 b ə e n
+      1 b ə e
+      1 b ə a t
+      1 b ə a
+      1 b e u t
+      1 b a w
+      1 b a m
+      1 b a
+      1 a z u t
+      1 a n u t
+      1 a b u t
+      1 p o s

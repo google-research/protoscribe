@@ -1,0 +1,41 @@
+// Copyright 2024 The Protoscribe Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Morphology parameters.
+
+syntax = "proto2";
+
+package protoscribe;
+
+// Basic morphology supporting gender, number and case.
+//
+// Also see `Feature` abstraction in Pynini.
+message MorphologyParameters {
+  // Gender features, e.g., ["mas", "fem", "neu"].
+  repeated string gender_features = 1;
+
+  // Number features, e.g., ["sg", "du", "pl"].
+  repeated string number_features = 2;
+
+  // Case features, e.g., ["nom", "obl"].
+  repeated string case_features = 3;
+
+  // Optional list of feature-value pairs that have zero morphs. Feature and
+  // value in an individual pair is separated by "=", e.g., "cas=nom".
+  repeated string zero_feature_values = 4;
+
+  // Boundary symbol: this defaults to "+" and should be disjoint from the set
+  // of phonemes used in the phonology.
+  optional string boundary = 5;
+}

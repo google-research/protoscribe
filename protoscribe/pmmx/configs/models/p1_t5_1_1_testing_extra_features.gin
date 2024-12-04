@@ -1,0 +1,93 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# PMMX-One (P1) Tiny version with extra features for unit tests.
+# Provides MODEL
+# ginlint: disable=bad-import-order
+from __gin__ import dynamic_registration
+
+from flax import linen
+from flaxformer.components import embedding
+from protoscribe.pmmx import feature_converters
+from protoscribe.pmmx import pmmx_architecture
+
+include 'protoscribe/pmmx/configs/models/p1_t5_1_1_base.gin'  # imports vocab, optimizer and model.
+
+# Architecture overrides
+NUM_HEADS = 4
+NUM_LAYERS = 2
+HEAD_DIM = 8
+EMBED_DIM = 13
+MLP_DIM = 73
+
+# Overrides for testing
+DROPOUT_RATE = 0.0
+VOCAB_SIZE = 2000
+
+feature_converters.MultimodalEncDecFeatureConverterFactory:
+  feature_specs = (
+      ("text_tokens", 'int32', 1),
+      ("new_tokens", 'int32', 1),
+      ("image_v2_dense", 'float32', 2),
+      ("image_v3_dense", 'float32', 2),
+      ("extra1", 'int32', 1),
+      ("extra2", 'int32', 1),
+  )
+
+pmmx_architecture.MultimodalEncoder:
+  modality_spec = ('text_tokens', 'image_dense', 'random_modality')
+  feature_spec = (
+    ('text_tokens', 'text_tokens'),
+    ('new_tokens', 'text_tokens'),
+    ('image_v2_dense', 'image_dense'),
+    ('extra1', 'text_tokens'),
+    ('extra2', 'text_tokens'),
+    ('extra3', 'random_modality')
+  )
+  sub_features_spec = {
+    'text_tokens': ['extra1', 'extra2', 'extra3'],
+  }
+  modality_embedders_spec = {
+    # Extra1 and extra2 are part of the same "feature" with the text tokens.
+    'text_tokens': [
+        ('extra1', @extra1_embedder/embedding.Embed),
+        ('extra2', @extra2_embedder/embedding.Embed),
+        ('extra3', @pmmx_architecture.DenseEmbed)
+    ],
+    'image_dense': [
+        ('image_v2_dense', @pmmx_architecture.DenseEmbed),
+    ]
+  }
+
+extra1_embedder/embedding.Embed:
+  num_embeddings = 128
+  features = %EMBED_DIM
+  cast_input_dtype = 'int32'
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @token_embedder_init/linen.initializers.normal()
+  one_hot = True
+  name = 'extra1_embedder'
+extra1_embedder_init/linen.initializers.normal.stddev = 1.0
+
+extra2_embedder/embedding.Embed:
+  num_embeddings = 128
+  features = %EMBED_DIM
+  cast_input_dtype = 'int32'
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @token_embedder_init/linen.initializers.normal()
+  one_hot = True
+  name = 'extra2_embedder'
+extra2_embedder_init/linen.initializers.normal.stddev = 1.0

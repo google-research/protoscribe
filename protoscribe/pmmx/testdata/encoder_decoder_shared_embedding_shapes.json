@@ -1,0 +1,118 @@
+{
+  "decoder": {
+    "decoder_norm": {
+      "scale": [7]
+    },
+    "layers_0": {
+      "encoder_decoder_attention": {
+        "key": {
+          "kernel": [7, 32]
+        },
+        "out": {
+          "kernel": [32, 7]
+        },
+        "query": {
+          "kernel": [7, 32]
+        },
+        "value": {
+          "kernel": [7, 32]
+        }
+      },
+      "mlp": {
+        "wi_0": {
+          "kernel": [7, 11]
+        },
+        "wi_1": {
+          "kernel": [7, 11]
+        },
+        "wo": {
+          "kernel": [11, 7]
+        }
+      },
+      "pre_cross_attention_layer_norm": {
+        "scale": [7]
+      },
+      "pre_mlp_layer_norm": {
+        "scale": [7]
+      },
+      "pre_self_attention_layer_norm": {
+        "scale": [7]
+      },
+      "self_attention": {
+        "key": {
+          "kernel": [7, 32]
+        },
+        "out": {
+          "kernel": [32, 7]
+        },
+        "query": {
+          "kernel": [7, 32]
+        },
+        "value": {
+          "kernel": [7, 32]
+        }
+      }
+    },
+    "logits_dense": {
+      "kernel": [7, 32128]
+    },
+    "relpos_bias": {
+      "rel_embedding": [4, 32]
+    }
+  },
+  "encoder": {
+    "encoder_norm": {
+      "scale": [7]
+    },
+    "layers_0": {
+      "attention": {
+        "key": {
+          "kernel": [7, 32]
+        },
+        "out": {
+          "kernel": [32, 7]
+        },
+        "query": {
+          "kernel": [7, 32]
+        },
+        "value": {
+          "kernel": [7, 32]
+        }
+      },
+      "mlp": {
+        "wi_0": {
+          "kernel": [7, 11]
+        },
+        "wi_1": {
+          "kernel": [7, 11]
+        },
+        "wo": {
+          "kernel": [11, 7]
+        }
+      },
+      "pre_attention_layer_norm": {
+        "scale": [7]
+      },
+      "pre_mlp_layer_norm": {
+        "scale": [7]
+      }
+    },
+    "multimodal_relpos_bias": {
+      "rel_embedding": [4, 256]
+    },
+    "relpos_bias": {
+      "rel_embedding": [4, 32]
+    },
+    "image_v2_dense_embedder": {
+      "embedders_image_v2_dense": {
+        "kernel": [3, 7]
+      }
+    },
+    "token_position_embedder": {
+      "embedding": [512, 7]
+    }
+  },
+  "token_embedder": {
+    "embedding": [32128, 7]
+  }
+}

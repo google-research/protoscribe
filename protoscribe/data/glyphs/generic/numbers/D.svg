@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <path style="stroke: rgb(0, 0, 0); fill: none;" d="M 129.787 95.705
+						     C 129.787 95.705
+						     213.42243798144213
+						     133.4889765861935
+						     214.541 155.129 C
+						     215.70567529518726
+						     177.6611441629393
+						     129.787 228.684
+						     129.787 228.684"
+	bx:d="M 129.787 95.705 R 214.541 155.129 R 129.787 228.684
+	      1@e5ebfaf7"  stroke-width="10"/>
+  <line style="stroke: rgb(0, 0, 0); fill: none;" x1="130.362"
+	y1="94.703" x2="129.787" y2="228.684"  stroke-width="10"/>
+</svg>

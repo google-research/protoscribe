@@ -1,0 +1,326 @@
+a
+a b
+a j
+a m
+a n
+a p
+a s
+a t
+a w
+b a
+b a b
+b a j
+b a k
+b a n
+b a p
+b a t
+b e
+b e b
+b e j
+b e k
+b e m
+b e p
+b e s
+b e t
+b e w
+b i
+b i j
+b i w
+b o
+b o m
+b o p
+b o s
+b o t
+b u
+b u j
+b u p
+b u s
+b u t
+b u w
+e
+e b
+e j
+e k
+e m
+e n
+e p
+e s
+e t
+e w
+i
+i b
+i j
+i k
+i m
+i n
+i p
+i s
+i t
+i w
+j a
+j a b
+j a j
+j a k
+j a m
+j a n
+j a s
+j a w
+j e
+j e b
+j e k
+j e m
+j e n
+j i
+j i b
+j i j
+j i m
+j i s
+j i t
+j i w
+j o
+j o b
+j o k
+j o m
+j o p
+j o s
+j o t
+j u
+j u b
+j u k
+j u m
+j u p
+j u s
+k a
+k a k
+k a p
+k a s
+k a t
+k a w
+k e
+k e b
+k e j
+k e k
+k e m
+k e w
+k i
+k i b
+k i k
+k i m
+k i t
+k i w
+k o
+k o k
+k o n
+k o p
+k o s
+k o t
+k u
+k u k
+k u m
+k u n
+k u s
+k u t
+k u w
+m a
+m a b
+m a j
+m a k
+m a m
+m a p
+m a s
+m a w
+m e
+m e b
+m e j
+m e k
+m e m
+m e s
+m e t
+m i
+m i b
+m i k
+m i n
+m i s
+m i w
+m o
+m o m
+m o p
+m o w
+m u
+m u j
+m u k
+m u m
+m u p
+m u w
+n a
+n a b
+n a k
+n a m
+n a t
+n a w
+n e
+n e b
+n e k
+n e n
+n e p
+n i
+n i j
+n i m
+n i n
+n i p
+n i s
+n i t
+n o
+n o b
+n o k
+n o n
+n o p
+n o s
+n o t
+n o w
+n u
+n u b
+n u m
+n u n
+n u p
+n u t
+o
+o b
+o j
+o k
+o m
+o n
+o p
+o s
+o t
+o w
+p a
+p a b
+p a n
+p a p
+p a s
+p a w
+p e
+p e b
+p e j
+p e m
+p e n
+p e p
+p e w
+p i
+p i m
+p i s
+p i t
+p i w
+p o
+p o j
+p o k
+p o p
+p o s
+p o t
+p o w
+p u
+p u b
+p u j
+p u k
+p u m
+p u p
+p u w
+s a
+s a k
+s a m
+s a n
+s a p
+s a s
+s a t
+s e
+s e b
+s e j
+s e k
+s e m
+s e p
+s e w
+s i
+s i b
+s i j
+s i m
+s i s
+s i t
+s o
+s o b
+s o j
+s o k
+s o p
+s o t
+s o w
+s u
+s u p
+s u t
+t a
+t a b
+t a j
+t a k
+t a n
+t a t
+t a w
+t e
+t e b
+t e j
+t e m
+t e w
+t i
+t i j
+t i m
+t i s
+t i t
+t o
+t o j
+t o k
+t o m
+t o p
+t o t
+t o w
+t u
+t u j
+t u m
+t u n
+t u s
+u
+u b
+u j
+u k
+u m
+u n
+u p
+u s
+u t
+u w
+w a
+w a b
+w a j
+w a m
+w a n
+w e
+w e b
+w e j
+w e s
+w e t
+w i
+w i b
+w i j
+w i k
+w i m
+w i w
+w o
+w o b
+w o j
+w o m
+w o t
+w o w
+w u
+w u j
+w u k
+w u n
+w u p
+w u t
+w u w

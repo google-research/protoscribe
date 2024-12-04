@@ -1,0 +1,11 @@
+uvcd_stop	p t k
+vcd_stop	b d g
+uvcd_fric	f s x
+vcd_fric	v z ɣ
+sib	s z
+nas	m n ŋ
+liq	r l
+gli	y w
+vow1	a e i o u
+vow2	ø y ɛ ɪ
+vow_lax	ə

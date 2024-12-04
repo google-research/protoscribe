@@ -1,0 +1,147 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+# Defaults for pretraining with train.py.
+#
+# You must also include a binding for MODEL.
+#
+# Required to be set:
+#
+# -MIXTURE_OR_TASK_NAME
+# -MIXTURE_OR_TASK_MODULE
+# -TASK_FEATURE_LENGTHS
+# -MODEL_DIR
+#
+# Commonly overridden options:
+#
+# - DatasetConfig.batch_size
+# - PjitPartitioner.num_partitions
+# - Trainer.num_microbatches
+from __gin__ import dynamic_registration
+import __main__ as train_script
+import seqio
+from t5x import adafactor
+from t5x import checkpoints
+from t5x import partitioning
+from t5x import utils
+from protoscribe.pmmx.utils import adafactor_utils
+from protoscribe.pmmx.utils import gin_str_utils
+from protoscribe.pmmx.utils import partitioning_utils
+from protoscribe.pmmx.utils import seqio_utils
+include 't5x/configs/runs/pretrain.gin'
+
+# Use None by default, which infers the max length by iterating over
+# the evaluation set, for efficiency reasons.
+# Some features, such as LP Summarizer input text, have very long lengths and
+# need to be truncated to a max length to avoid HBM OOMs.
+# You may specify only some of the feature lengths; others will be inferred.
+INFER_TASK_FEATURE_LENGTHS = None
+
+NUM_PARTITIONS = 1
+MODEL_DIR = %gin.REQUIRED
+LEARNING_RATE = 1.0
+WARMUP_STEPS = 1000
+EVAL_PERIOD = 1000
+EVAL_SPLIT = 'validation'
+# Adding this alias for clarity that EVAL_SPLIT (And the alias INFER_EVAL_SPLIT)
+# applies to infer_eval, not training_eval.
+INFER_EVAL_SPLIT = %EVAL_SPLIT
+
+EVAL_MIXTURE_OR_TASK_NAME = %MIXTURE_OR_TASK_NAME
+EVALUATOR_USE_MEMORY_CACHE = True
+EVALUATOR_NUM_EXAMPLES = None  # Use all examples in the infer_eval dataset.
+JSON_WRITE_N_RESULTS = None  # Write all inferences.
+
+train_script.train:
+  model_dir = %MODEL_DIR  # needed for mapping --gin.__main__.train.model_dir
+  infer_eval_dataset_cfg = @infer_eval/utils.DatasetConfig()
+  eval_period = %EVAL_PERIOD
+  inference_evaluator_cls = @seqio.Evaluator
+  get_dataset_fn = @seqio_utils.get_dataset  # Required for dataset augmentation
+  partitioner = @partitioning.PjitPartitioner()
+
+seqio_utils.get_dataset:
+  num_seeds = 60  # O(num. of epochs)
+
+train/utils.DatasetConfig:
+  use_custom_packing_ops = False
+
+train_eval/utils.DatasetConfig:
+  use_custom_packing_ops = False
+
+# Unlike P5X, we do infer-eval for text metrics during pretraining.
+infer_eval/utils.DatasetConfig:
+  use_custom_packing_ops = False
+  mixture_or_task_name = %EVAL_MIXTURE_OR_TASK_NAME
+  task_feature_lengths = %INFER_TASK_FEATURE_LENGTHS
+  split = %INFER_EVAL_SPLIT
+  batch_size = 128
+  shuffle = False
+  seed = 42
+  use_cached = False
+  pack = False
+  module = %MIXTURE_OR_TASK_MODULE
+
+# Parameters for utils.SaveCheckpointConfig:
+# To keep all checkpoints override
+#     utils.SaveCheckpointConfig.keep = None
+#     utils.SaveCheckpointConfig.checkpointer_cls = None
+# ==============================================================================
+utils.SaveCheckpointConfig.save_dataset = True
+utils.SaveCheckpointConfig.keep = 20  # Remove all but the best $keep ckpts.
+utils.SaveCheckpointConfig.keep_dataset_checkpoints = 1  # Keep only 1 dataset iterator (b/230682911)
+utils.SaveCheckpointConfig.checkpointer_cls = @checkpoints.SaveBestCheckpointer
+
+# Parameters for checkpoints.SaveBestCheckpointer:
+# ==============================================================================
+# Example metrics:
+#  * train accuracy:
+#        values = ['train', 'accuracy]'
+#  * training_eval accuracy:
+#        values = ["training_eval", %MIXTURE_OR_TASK_NAME, "accuracy"]
+metric_name_builder/gin_str_utils.join:
+  values = ["training_eval", %MIXTURE_OR_TASK_NAME, "perplexity"]
+  delimiter = "/"
+
+checkpoints.SaveBestCheckpointer:
+  force_keep_period = 100000
+  keep_checkpoints_without_metrics = False
+  metric_mode = 'min'  # 'min' for perplexity / 'max' for accuracy.
+  metric_name_to_monitor = @metric_name_builder/gin_str_utils.join()
+
+
+utils.create_learning_rate_scheduler:
+  factors = 'constant * linear_warmup * rsqrt_decay'
+  base_learning_rate = %LEARNING_RATE
+  warmup_steps = %WARMUP_STEPS
+
+seqio.Evaluator:
+  logger_cls = [@seqio.PyLoggingLogger, @seqio.TensorBoardLogger, @seqio.JSONLogger]
+  num_examples = %EVALUATOR_NUM_EXAMPLES
+  use_memory_cache = %EVALUATOR_USE_MEMORY_CACHE
+
+seqio.JSONLogger:
+  write_n_results = %JSON_WRITE_N_RESULTS
+
+partitioning.PjitPartitioner:
+  num_partitions = %NUM_PARTITIONS
+  logical_axis_rules = @partitioning.standard_logical_axis_rules()
+
+partitioning.standard_logical_axis_rules:
+  additional_rules = @partitioning_utils.additional_axis_rules()
+  activation_partitioning_dims = 2  # See b/223425357#comment42
+
+adafactor.Adafactor:
+  logical_factor_rules = @adafactor_utils.logical_factor_rules()
