@@ -1,5 +1,7 @@
 # ProtoScribe: Modeling the Evolution of Writing
 
+![CI status](https://github.com/google-research/protoscribe/actions/workflows/validate.yaml/badge.svg?branch=main)
+
 <center>
 <font size="+4">𓏞</font>
 <p>

@@ -27,12 +27,14 @@ jobs:
     - uses: actions/checkout@v3
       with:
         submodules: true
-    - name: VirtualEnv
+    - name: SetupAndTest
       run: |
-        export VIRTUAL_ENV=$(mktemp -d)                                                                                                                               
-        python -m venv "$VIRTUAL_ENV"                                                                                                                           
-        . $VIRTUAL_ENV/bin/activate                                                                                                                                   
+        export VIRTUAL_ENV=$(mktemp -d)
+        echo "Virtual environment: $VIRTUAL_ENV"
+        python -m venv "$VIRTUAL_ENV"
+        . $VIRTUAL_ENV/bin/activate
+        echo "Setting up ..."
         ./setup.sh
+        echo "Testing ..."
         ./test.sh
         deactivate
-        

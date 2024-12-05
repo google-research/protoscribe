@@ -57,7 +57,8 @@ INDIVIDUAL_COMPONENTS=(
   "protoscribe/sketches/inference/sketches_from_jsonl_test.py"
   "protoscribe/speech"
   "protoscribe/texts"
-  "protoscribe/vision"
+  # No tests in vision component.
+  # "protoscribe/vision"
 )
 for test_component in "${INDIVIDUAL_COMPONENTS[@]}"; do
   "${PYTEST}" -v "${test_component}"
