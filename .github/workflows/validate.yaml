@@ -32,7 +32,7 @@ jobs:
         export VIRTUAL_ENV=$(mktemp -d)                                                                                                                               
         python -m venv "$VIRTUAL_ENV"                                                                                                                           
         . $VIRTUAL_ENV/bin/activate                                                                                                                                   
-    - name: Setup
-      run: ./setup.sh
-    - name: Test
-      run: ./test.sh
+        ./setup.sh
+        ./test.sh
+        deactivate
+        
