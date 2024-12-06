@@ -36,16 +36,14 @@ rather than depending on individual libraries.
 
 import logging
 import os
-import subprocess
 import shutil
-import sys
 from typing import Any
 
 from absl import flags
+from protoscribe.utils import subprocess_utils
 
 import glob
 import os
-# Internal resources dependency
 
 _SRC_DIR = "protoscribe"
 _RESOURCE_DIR = "protoscribe"
@@ -209,10 +207,6 @@ def _src_file(path: str) -> str:
   return os.path.join(_SRC_DIR, path)
 
 
-def _get_resource_path(path: str) -> str:
-  return os.path.join(os.getcwd(), path)
-
-
 def _copy_file(src_path: str, dst_path: str) -> None:
   """Helper for file copying."""
   logging.info("Copying %s -> %s ...", src_path, dst_path)
@@ -266,71 +260,6 @@ def _common_language_args() -> list[Any]:
   ]
 
 
-def _val_to_string(value: Any) -> str:
-  """Converts argument to string."""
-  value = str(value)
-  if value == "False" or value == "True":
-    value = value.lower()
-  return value
-
-
-def _run_subprocess(exec_path: str, args: list[Any]) -> None:
-  """Runs executable as a subprocess using the supplied arguments.
-
-  Args:
-    exec_path: Path of the process executable to run.
-    args: A flat list of argument names and values of the following format:
-      [flag_name_1, flag_value_1, ..., flag_name_N, flag_value_N],
-      where each flag must have the corresponding name and value present in
-      the list.
-
-  Raises:
-    ValueError: if invalid argument list is passed.
-    CalledProcessError: if execution failed for some reason.
-  """
-  if len(args) % 2 != 0:
-    raise ValueError(
-        f"The argument list should have an even length, got {len(args)}!"
-    )
-
-  # Determine the process to execute.
-  exec_args = [sys.executable, _get_resource_path(f"{exec_path}_main.py")]
-
-  # Makes sure that all elements of the process' argument list are
-  # in `name=value` format.
-  process_args = []
-  args_it = iter(args)
-  for arg_name, arg_value in zip(args_it, args_it):
-    value = _val_to_string(arg_value)
-    process_args.append(f"{arg_name}={value}")
-
-  # Execute the command in `exec_path` in a subprocess and wait for its
-  # completion printing the logs as it executes.
-  args = exec_args + process_args + ["--logtostderr"]
-  logging.info("Executing: %s", args)
-  proc = subprocess.Popen(
-      args,
-      shell=False,
-      stdout=subprocess.PIPE,
-      stderr=subprocess.STDOUT,
-      encoding="utf8",
-      # Make sure the path is correct relative to the current working directory.
-      env=os.environ.copy().update({
-        "PYTHONPATH": ".",
-      })
-  )
-
-  # Dump the logs from the process in real time.
-  assert proc.stdout  # Placate type checker.
-  for line in iter(proc.stdout.readline, ""):
-    print(line.rstrip())
-
-  # Wait for completion.
-  status_code = proc.wait()
-  if status_code != 0:
-    raise subprocess.CalledProcessError(proc.returncode, proc.args)
-
-
 def _prepare_language_components() -> None:
   """Prepares all the necessary language components under output directory."""
 
@@ -357,7 +286,7 @@ def _prepare_language_components() -> None:
   common_language_args = _common_language_args()
   if _GENERATE_LANGUAGE.value:
     logging.info("Generating new language in %s ...", language_dir)
-    _run_subprocess(
+    subprocess_utils.run_subprocess(
         _TEXT_GENERATOR,
         args=common_language_args + [
             "--generate_lexical_resources", "true",
@@ -369,7 +298,7 @@ def _prepare_language_components() -> None:
         ]
     )
     logging.info("Generating phonetic embeddings in %s ...", language_dir)
-    _run_subprocess(
+    subprocess_utils.run_subprocess(
         _PHONETIC_EMBEDDINGS_BUILDER,
         args=[
             "--main_lexicon", _language_file("lexicon.tsv"),
@@ -383,7 +312,7 @@ def _prepare_language_components() -> None:
 
   # Generates in-domain held-out data.
   logging.info("Generating in-domain held-out data ...")
-  _run_subprocess(
+  subprocess_utils.run_subprocess(
       _TEXT_GENERATOR,
       args=common_language_args + [
           "--concepts", _output_file("administrative_categories.txt"),
@@ -399,7 +328,7 @@ def _prepare_language_components() -> None:
 
   # Generates test data.
   logging.info("Generating test data ...")
-  _run_subprocess(
+  subprocess_utils.run_subprocess(
       _TEXT_GENERATOR,
       args=common_language_args + [
           "--concepts", _output_file("non_administrative_categories.txt"),
@@ -465,7 +394,7 @@ def _run_corpus_builder_local(args: dict[str, Any]) -> None:
   for arg_name, arg_value in args.items():
     builder_args.extend([f"--{arg_name}", arg_value])
 
-  _run_subprocess(_CORPUS_BUILDER_PIPELINE, args=builder_args)
+  subprocess_utils.run_subprocess(_CORPUS_BUILDER_PIPELINE, args=builder_args)
 
 
 def _run_corpus_builder() -> None:
