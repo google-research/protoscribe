@@ -66,11 +66,11 @@ def load_administrative_concepts() -> set[str]:
 
 def main(unused_argv):
   administrative_concepts = load_administrative_concepts()
-  glob = glob.glob(_TEXTS_GLOB.value)
+  paths = glob.glob(_TEXTS_GLOB.value)
   administrative_glyphs = set()
   non_administrative_glyphs = set()
   word_vocab = set()
-  for path in glob:
+  for path in paths:
     with open(path) as stream:
       reader = csv.reader(stream, delimiter="\t", quotechar='"')
       for row in reader:
