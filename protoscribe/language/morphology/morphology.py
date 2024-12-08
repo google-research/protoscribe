@@ -351,7 +351,7 @@ def write_rules_to_far(
     return
   if is_templates and isinstance(rules[0], tuple):
     arc_type = rules[0][0].arc_type()
-  elif isinstance(rules, py.Fst):
+  elif isinstance(rules[0], py.Fst):
     arc_type = rules[0].arc_type()
   flattened_rules = []
   if is_templates and isinstance(rules[0], tuple):
