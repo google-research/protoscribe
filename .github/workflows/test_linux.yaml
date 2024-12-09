@@ -12,29 +12,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Validate
+name: Linux Tests
 
 on: [push, pull_request]
+
+permissions: read-all
+
+# Prevent previous workflows from running.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 env:
   FORCE_COLOR: true
 
 jobs:
   test-linux:
-    name: Build Linux
+    name: Test Linux
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
-        submodules: true
-    - name: SetupAndTest
+        submodules: "recursive"
+
+    - name: Create and start virtual environment
       run: |
-        export VIRTUAL_ENV=$(mktemp -d)
-        echo "Virtual environment: $VIRTUAL_ENV"
-        python -m venv "$VIRTUAL_ENV"
-        . $VIRTUAL_ENV/bin/activate
-        echo "Setting up ..."
+        python3 -m venv venv
+        source venv/bin/activate
+
+    - name: Set up the packages
+      run: |
+        source venv/bin/activate
         ./setup.sh
-        echo "Testing ..."
+
+    -name: Testing
+      run: |
         ./test.sh
         deactivate
