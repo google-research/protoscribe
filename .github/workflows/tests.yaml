@@ -45,7 +45,7 @@ jobs:
         source venv/bin/activate
         ./setup.sh
 
-    -name: Testing
+    - name: Testing
       run: |
         ./test.sh
         deactivate
