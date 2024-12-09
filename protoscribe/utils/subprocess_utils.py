@@ -15,24 +15,12 @@
 """Utilities for executing subprocesses."""
 
 import logging
-import os
 import subprocess
-import sys
 from typing import Any
+import os
+import sys
 
-# Internal resources dependency
-
-
-def _get_resource_path(path: str) -> str:
-  """Returns fully qualified path for the given resource.
-
-  Args:
-    path: Path to resource.
-
-  Returns:
-    Full path.
-  """
-  return os.path.join(os.getcwd(), path)
+from protoscribe.utils import file_utils
 
 
 def _val_to_string(value: Any) -> str:
@@ -63,7 +51,9 @@ def run_subprocess(exec_path: str, args: list[Any]) -> None:
     )
 
   # Determine the process to execute.
-  exec_args = [sys.executable, _get_resource_path(f"{exec_path}_main.py")]
+  exec_args = [
+      sys.executable, file_utils.resource_path(f"{exec_path}_main.py")
+  ]
 
   # Makes sure that all elements of the process' argument list are
   # in `name=value` format.

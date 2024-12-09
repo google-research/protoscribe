@@ -17,10 +17,10 @@
 import csv
 import logging
 import os
-import shutil
 
 from absl import app
 from absl import flags
+from protoscribe.utils import file_utils
 
 import glob
 import os
@@ -49,10 +49,6 @@ _IMAGE_HEIGHT = flags.DEFINE_integer(
     "Height of the glyph images (in pixels)."
 )
 
-_NUM_COPY_WORKERS = flags.DEFINE_integer(
-    "num_copy_workers", -1,
-    "Number of workers when performing parallel copy."
-)
 
 # HTML header.
 _HTML_HEADER = """<!DOCTYPE html>
@@ -140,11 +136,9 @@ def _copy_svgs(concepts: set[str], source_dir: str, target_dir: str) -> None:
     source_path = os.path.join(source_dir, filename)
     if not os.path.exists(source_path):
       raise FileNotFoundError(f"Source SVG {source_path} not found")
-    paths.append((source_path, os.path.join(target_dir, filename)))
+    paths.append(source_path)
 
-  for source_path, target_path in paths:
-    logging.info("Copying %s -> %s ...", source_path, target_path)
-    shutil.copy(source_path, target_path)
+  file_utils.copy_files(paths, target_dir)
 
 
 def main(unused_argv):

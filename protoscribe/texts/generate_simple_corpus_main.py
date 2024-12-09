@@ -25,16 +25,14 @@ python protoscribe/texts/generate_simple_corpus_main.py \
 
 from collections.abc import Sequence
 import logging
-import os
-import shutil
 
 from absl import app
 from absl import flags
+from protoscribe.utils import file_utils
 from protoscribe.utils import subprocess_utils
 
 import glob
 import os
-# Internal resources dependency
 
 _DATASET_DIR = flags.DEFINE_string(
     "dataset_dir", None,
@@ -72,8 +70,8 @@ _PROBABILITY_OF_SUPERCATEGORY_GLYPH = flags.DEFINE_float(
     "Probability of generating a supercategory glyph if one is available."
 )
 
-_SRC_DIR = "protoscribe"
-_RESOURCE_DIR = "protoscribe"
+_SRC_DIR = file_utils.SRC_DIR
+_RESOURCE_DIR = file_utils.RESOURCE_DIR
 _TEXT_GENERATOR = f"{_RESOURCE_DIR}/texts/generate"
 _VOCAB_BUILDER = f"{_RESOURCE_DIR}/texts/make_vocab_files"
 _PHONETIC_EMBEDDINGS_BUILDER = (
@@ -166,11 +164,8 @@ def main(argv: Sequence[str]) -> None:
   logging.info("Copying semantic embeddings ...")
   sem_dir = f"{_RESOURCE_DIR}/data/semantics/bnc"
   for filename in ["embeddings.txt", "numbers.txt"]:
-    src_file = os.path.join(
-        os.getcwd(), f"{sem_dir}/{filename}"
-    )
-    dst_file = f"{params_dir}/{filename}"
-    shutil.copy2(src_file, dst_file)
+    src_file = file_utils.resource_path(f"{sem_dir}/{filename}")
+    file_utils.copy_full_path(src_file, params_dir)
 
   logging.info("Initial corpus generated in %s.", initial_dir)
 

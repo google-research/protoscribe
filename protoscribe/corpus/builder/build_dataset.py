@@ -36,17 +36,16 @@ rather than depending on individual libraries.
 
 import logging
 import os
-import shutil
 from typing import Any
 
 from absl import flags
+from protoscribe.utils import file_utils
 from protoscribe.utils import subprocess_utils
 
 import glob
 import os
 
-_SRC_DIR = "protoscribe"
-_RESOURCE_DIR = "protoscribe"
+_RESOURCE_DIR = file_utils.RESOURCE_DIR
 _TEXT_GENERATOR = f"{_RESOURCE_DIR}/texts/generate"
 _PHONETIC_EMBEDDINGS_BUILDER = (
     f"{_RESOURCE_DIR}/language/phonology/build_phonetic_embeddings"
@@ -67,13 +66,13 @@ _MAX_LOCAL_WORKERS = flags.DEFINE_integer(
 
 _ADMINISTRATIVE_CATEGORIES = flags.DEFINE_string(
     "administrative_categories",
-    f"{_SRC_DIR}/data/concepts/administrative_categories.txt",
+    f"{file_utils.SRC_DIR}/data/concepts/administrative_categories.txt",
     "Path to administrative categories to use."
 )
 
 _NON_ADMINISTRATIVE_CATEGORIES = flags.DEFINE_string(
     "non_administrative_categories",
-    f"{_SRC_DIR}/data/concepts/non_administrative_categories.txt",
+    f"{file_utils.SRC_DIR}/data/concepts/non_administrative_categories.txt",
     "Path to non-administrative categories to use."
 )
 
@@ -108,7 +107,7 @@ _MORPHEME_SHAPE = flags.DEFINE_enum(
         "MORPHEME_CVCC_MONO"
     ],
     "Morpheme shape. For available values see "
-    f"{_SRC_DIR}/texts/common_configs.py."
+    f"{file_utils.SRC_DIR}/texts/common_configs.py."
 )
 
 _NUMBER_CONFIG = flags.DEFINE_string(
@@ -202,35 +201,6 @@ _PREFER_CONCEPT_SVG = flags.DEFINE_bool(
 )
 
 
-def _src_file(path: str) -> str:
-  """Returns full path for the source file."""
-  return os.path.join(_SRC_DIR, path)
-
-
-def _copy_file(src_path: str, dst_path: str) -> None:
-  """Helper for file copying."""
-  logging.info("Copying %s -> %s ...", src_path, dst_path)
-  shutil.copy2(src_path, dst_path)
-
-
-def _copy_src_file(dir_name: str, file_name: str, language_dir: str) -> None:
-  """Copy a source file to a language directory."""
-  src_path = _src_file(os.path.join(dir_name, file_name))
-  dst_path = os.path.join(language_dir, file_name)
-  _copy_file(src_path, dst_path)
-
-
-def _copy_full_path(file_path: str, language_dir: str) -> None:
-  """Copies a file provided by the full path to language directory."""
-
-  full_file_path = os.path.join(os.getcwd(), file_path)
-  _copy_src_file(
-      dir_name=os.path.dirname(full_file_path),
-      file_name=os.path.basename(full_file_path),
-      language_dir=language_dir
-  )
-
-
 def _output_file(filename: str) -> str:
   return os.path.join(_OUTPUT_DIR.value, filename)
 
@@ -271,16 +241,16 @@ def _prepare_language_components() -> None:
     os.makedirs(language_dir, exist_ok=True)
 
   # Copy these files that are copyable verbatim.
-  _copy_src_file("texts/configs", _NUMBER_CONFIG.value, language_dir)
-  _copy_full_path(_ADMINISTRATIVE_CATEGORIES.value, output_dir)
-  _copy_full_path(_NON_ADMINISTRATIVE_CATEGORIES.value, output_dir)
+  file_utils.copy_src_file("texts/configs", _NUMBER_CONFIG.value, language_dir)
+  file_utils.copy_full_path(_ADMINISTRATIVE_CATEGORIES.value, output_dir)
+  file_utils.copy_full_path(_NON_ADMINISTRATIVE_CATEGORIES.value, output_dir)
   all_concept_paths = [
       _output_file("administrative_categories.txt"),
       _output_file("non_administrative_categories.txt"),
   ]
   excluded_concepts_path = _excluded_concepts_path()
   if excluded_concepts_path:
-    _copy_file(_EXCLUDE_CONCEPTS_FILE.value, excluded_concepts_path)
+    file_utils.copy_file(_EXCLUDE_CONCEPTS_FILE.value, excluded_concepts_path)
 
   # Generate the actual core language and embeddings files.
   common_language_args = _common_language_args()

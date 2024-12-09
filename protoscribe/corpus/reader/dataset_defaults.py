@@ -22,10 +22,10 @@ import ml_collections
 from protoscribe.glyphs import glyph_vocab as glyph_lib
 from protoscribe.sketches.utils import stroke_stats as stroke_stats_lib
 from protoscribe.sketches.utils import stroke_tokenizer as tokenizer_lib
+from protoscribe.utils import file_utils
 
 import glob
 import os
-# Internal resources dependency
 
 StrokeStats = stroke_stats_lib.FinalStrokeStats
 StrokeTokenizer = tokenizer_lib.StrokeTokenizer
@@ -109,8 +109,8 @@ def phonetic_embeddings_file() -> str:
 
 def stroke_tokenizer_file(file_name: str) -> str:
   """Stroke quantizer file for tokenizing sketches."""
-  return os.path.join(
-      os.getcwd(), _STROKE_TOKENIZER_ROOT_DIR, file_name
+  return file_utils.resource_path(
+      os.path.join(_STROKE_TOKENIZER_ROOT_DIR, file_name)
   )
 
 
