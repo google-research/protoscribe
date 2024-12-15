@@ -23,6 +23,7 @@
 WIDTH=256px
 HEIGHT=256px
 BACKGROUND=
+
 while getopts 'i:o:h:w:b' OPTION ; do
   case "$OPTION" in
     i)
@@ -40,8 +41,8 @@ while getopts 'i:o:h:w:b' OPTION ; do
     b)
       BACKGROUND="-b white"
       ;;
-    ?)
-      echo "Usage: $(basename \$0) -i INPUT -o OUTPUT" >&2
+    *)
+      echo "Usage: $(basename $0) -i <INPUT> -o <OUTPUT>" >&2
       exit 1
       ;;
   esac

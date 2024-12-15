@@ -40,15 +40,15 @@ while getopts 'i:o:' OPTION ; do
     o)
       OUTPUT_FILE="$OPTARG"
       ;;
-    ?)
-      echo "Usage: $(basename \$0) -i INPUT -o OUTPUT" >&2
+    *)
+      echo "Usage: $(basename $0) -i <INPUT> -o <OUTPUT>" >&2
       exit 1
       ;;
   esac
 done
 
 if [ ! -f "${INPUT_FILE}" ] ; then
-  echo "Invalid input file!"
+  echo "Input file does not exist!"
   exit 1
 fi
 if [ -z "${OUTPUT_FILE}" ] ; then
