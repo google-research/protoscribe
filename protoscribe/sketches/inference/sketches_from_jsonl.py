@@ -218,7 +218,10 @@ def _glyphs_from_json(
       for token in tokens:
         if token >= ds_lib.STROKE_OFFSET_FOR_GLYPH_IDS:
           if is_sketch_token:
-            raise ValueError(f"{input_text}: Glyph token outside the prefix!")
+            raise ValueError(
+                f"{input_text}: [hypothesis #{i}] "
+                "Glyph token outside the prefix!"
+            )
           glyph_tokens.append(token - ds_lib.STROKE_OFFSET_FOR_GLYPH_IDS)
           is_sketch_token = False
         else:
@@ -228,7 +231,7 @@ def _glyphs_from_json(
     # Sanity checks and detokenization.
     best_hypothesis = (i == (len(hypotheses) - 1))
     if tokens[0] != glyph_lib.GLYPH_BOS:
-      error = f"{input_text}: BOS glyph token missing!"
+      error = f"{input_text}: [hypothesis #{i}] BOS glyph token missing!"
       # Only throw for the best hypothesis.
       if best_hypothesis:
         raise ValueError(error)
@@ -238,7 +241,7 @@ def _glyphs_from_json(
       tokens = tokens[1:]
 
     if glyph_lib.GLYPH_EOS not in tokens:
-      error = f"{input_text}: EOS glyph token missing!"
+      error = f"{input_text}: [hypothesis #{i}] EOS glyph token missing!"
       if best_hypothesis:
         raise ValueError(error)
       else:
@@ -304,7 +307,7 @@ def _strokes_from_json(
   nbest_polylines = []
   nbest_strokes = []
   for idx, tokens in enumerate(nbest_token_seqs):
-    hyp_str = f"[hyp-{idx}]: " if len(nbest_token_seqs) > 1 else ""
+    hyp_str = f"[hypothesis #{idx}]: " if len(nbest_token_seqs) > 1 else ""
 
     # When glyphs and sketch tokens are combined remove the glyph sequence
     # prefix.
