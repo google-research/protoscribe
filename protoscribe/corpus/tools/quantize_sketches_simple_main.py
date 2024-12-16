@@ -156,8 +156,8 @@ def _collect_points(examples: Iterable[dict[str, Any]]) -> Array:
     touch_points.append(sketch[list(pen_touch_ids), :2])
     lift_points.append(sketch[list(pen_lift_ids), :2])
 
-  touch_points = np.concatenate(touch_points, dtype=np.float32)
-  lift_points = np.concatenate(lift_points, dtype=np.float32)
+  touch_points = np.concatenate(touch_points).astype(dtype=np.float32)
+  lift_points = np.concatenate(lift_points).astype(dtype=np.float32)
   num_touch = touch_points.shape[0]
   num_lift = lift_points.shape[0]
   logging.info(
