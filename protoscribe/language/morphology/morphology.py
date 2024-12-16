@@ -344,6 +344,9 @@ def write_rules_to_far(
     far_path: path to FAR.
     far_type: type of FAR.
     is_templates: if true, rules are tuples of tau, lambda, rho.
+
+  Raises:
+    Value error if the FST arc type cannot be determined.
   """
   if not rules:
     return
@@ -353,6 +356,8 @@ def write_rules_to_far(
     arc_type = rules[0][0].arc_type()
   elif isinstance(rules[0], py.Fst):
     arc_type = rules[0].arc_type()
+  else:
+    raise ValueError("Cannot deduce FST arc type from type of the rules!")
   flattened_rules = []
   if is_templates and isinstance(rules[0], tuple):
     for t, l, r in rules:
