@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """General utility functions for t5x."""
+
 import time
 from typing import Any, Callable, Optional, Type
 
@@ -86,6 +87,11 @@ def get_dataset(
     if (cfg.mixture_or_task_name not in tasks) and (
         cfg.mixture_or_task_name not in mixtures):
       define_task_fn(cfg.mixture_or_task_name)
+
+  if isinstance(cfg.mixture_or_task_name, seqio.DatasetProviderBase):
+    mixture_or_task = cfg.mixture_or_task_name
+  else:
+    mixture_or_task = seqio.get_mixture_or_task(cfg.mixture_or_task_name)
 
   shard_info = seqio.ShardInfo(index=shard_id, num_shards=num_shards)
 
