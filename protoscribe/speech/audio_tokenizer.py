@@ -22,7 +22,8 @@ AudioTokenizer = abstract_audio_tokenizer.AudioTokenizer
 def get_tokenizer(
     model_config_name_or_path: str,
     sample_rate: int,
-    has_quantizer: bool = False
+    has_quantizer: bool = False,
+    normalize_embeddings: bool = False,
 ) -> AudioTokenizer | None:
   """Manufactures an instance of audio tokenizer.
 
@@ -32,6 +33,7 @@ def get_tokenizer(
     sample_rate: Sampling rate in Hz.
       has_quantizer: True if the model has quantizer. In this case it should be
         possible to retrieve discrete tokens in addition to the embeddings.
+    normalize_embeddings: Use embeddings as is (default) or normalize them.
 
   Returns:
     Audio tokenizer instance.

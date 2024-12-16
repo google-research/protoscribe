@@ -399,6 +399,7 @@ def register(
     speech_normalize_waveform: bool = False,
     speech_keep_waveform: bool = False,
     speech_tokenizer_name_or_path: str | None = None,
+    speech_normalize_embeddings: bool = False,
     is_training: bool = True,
 ) -> str:
   """Registers task from gin scaffolding."""
@@ -453,7 +454,8 @@ def register(
   if speech_tokenizer_name_or_path:
     speech_tokenizer = audio_tokenizer.get_tokenizer(
         model_config_name_or_path=speech_tokenizer_name_or_path,
-        sample_rate=speech_corpus_sample_rate
+        sample_rate=speech_corpus_sample_rate,
+        normalize_embeddings=speech_normalize_embeddings,
     )
 
   task_name = f"{_TASK_NAME_PREFIX}_{task_name}"
