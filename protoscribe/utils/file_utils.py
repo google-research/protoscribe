@@ -65,6 +65,8 @@ def copy_file(src_path: str, dst_path: str) -> None:
 def copy_src_file(source_dir: str, file_name: str, output_dir: str) -> None:
   """Copy a source file to a target directory.
 
+  Target directory must exist.
+
   Args:
     source_dir: Source directory.
     file_name: File name or path in a `source_dir` to copy.
@@ -77,6 +79,8 @@ def copy_src_file(source_dir: str, file_name: str, output_dir: str) -> None:
 
 def copy_full_path(file_path: str, output_dir: str) -> None:
   """Copies a file provided by the full path to target directory.
+
+  Target directory must exist.
 
   Args:
     file_path: Fully-qualified file path.
@@ -93,6 +97,8 @@ def copy_full_path(file_path: str, output_dir: str) -> None:
 def copy_files(paths: list[str], target_dir: str) -> None:
   """Copies files to a target directory.
 
+  Target directory must exist.
+
   Args:
     paths: List of file paths.
     target_dir: Target directory for copying.
@@ -107,3 +113,25 @@ def copy_files(paths: list[str], target_dir: str) -> None:
   for source_path, target_path in paths:
     logging.info("Copying %s -> %s ...", source_path, target_path)
     shutil.copy(source_path, target_path)
+
+
+def copy_dir(source_dir: str, target_dir: str) -> None:
+  """Copies files from a source directory to a target directory.
+
+  Source and target directories must exist. Important: This is NOT a recursive
+  copy.
+
+  Args:
+    source_dir: Source directory from which the files will be recursively
+      copied.
+    target_dir: Target directory for copying.
+  """
+  if not os.path.isdir(source_dir):
+    raise ValueError(f"Source directory {source_dir} does not exist!")
+
+  logging.info("Copying `%s` to `%s` ...", source_dir, target_dir)
+  source_paths = []
+  for path in glob.glob(f"{source_dir}/*"):
+    if not os.path.isdir(path):
+      source_paths.append(path)
+  copy_files(source_paths, target_dir)
