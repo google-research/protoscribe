@@ -63,6 +63,9 @@ def tf_random_lp_ball_vector(
 
   Returns:
      Sampled tensor.
+
+  Raises:
+     ValueError if invalid normalization order was supplied.
   """
   if order not in ["INF", "1", "2"]:
     raise ValueError(f"Unsupported order: {order}")
@@ -89,7 +92,7 @@ def tf_random_lp_ball_vector(
           [dim], loc=1.0, scale=1.0, dtype=dtype, seed=seed
       )
       norm = tf.reduce_sum(tf.abs(x))
-    elif order == "2":
+    else:  # Assume order of 2 (Euclidean/Frobenius).
       # \mathcal{N}(0, 1).
       x = tf.random.normal(shape=[dim], dtype=dtype, seed=seed)
       norm = tf.sqrt(tf.reduce_sum(tf.square(x)))
