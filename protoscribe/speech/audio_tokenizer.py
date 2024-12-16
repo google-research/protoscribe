@@ -14,6 +14,8 @@
 
 """Audio tokenization interfaces."""
 
+import logging
+
 from protoscribe.speech import abstract_audio_tokenizer
 
 AudioTokenizer = abstract_audio_tokenizer.AudioTokenizer
@@ -31,12 +33,16 @@ def get_tokenizer(
     model_config_name_or_path: Name of the model configuration or path of
       the model. This is implementation-specific.
     sample_rate: Sampling rate in Hz.
-      has_quantizer: True if the model has quantizer. In this case it should be
-        possible to retrieve discrete tokens in addition to the embeddings.
+    has_quantizer: True if the model has quantizer. In this case it should be
+      possible to retrieve discrete tokens in addition to the embeddings.
     normalize_embeddings: Use embeddings as is (default) or normalize them.
 
   Returns:
     Audio tokenizer instance.
   """
+  logging.info(
+      "Model: '%s', sample_rate: %d, normalize embeddings: %d.",
+      model_config_name_or_path, sample_rate, normalize_embeddings
+  )
   # No audio tokenizers have been implemented yet.
   return None

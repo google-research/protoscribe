@@ -14,6 +14,8 @@
 
 r"""Constructs an HTML page to view the proposed spellings with glyph images.
 
+See `make_html.py` for the definitions of relevant flags.
+
 Example:
 --------
   EXPERIMENT_DIR=...
