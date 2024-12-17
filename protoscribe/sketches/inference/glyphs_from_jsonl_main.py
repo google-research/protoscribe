@@ -16,7 +16,7 @@
 
 import json
 import logging
-from typing import Sequence
+from typing import Any, Sequence
 
 from absl import app
 from absl import flags
@@ -46,6 +46,13 @@ _OUTPUT_FILE_FOR_SCORER = flags.DEFINE_string(
     "Output file in JSONL format that contains all the necessary information "
     "to run the scorer.",
     required=True
+)
+
+_SORT_BY = flags.DEFINE_enum(
+    "sort_by", "concepts",
+    ["concepts", "confidence"],
+    "Sort the resulting summary by the specified column. Support values: "
+    "`concept`: input concept names, `confidence`: glyph confidence."
 )
 
 
@@ -90,8 +97,17 @@ def main(argv: Sequence[str]) -> None:
   if num_errors:
     logging.warning("Encountered %d errors.", num_errors)
 
-  results = sorted(results, key=lambda x: x[0])
-  logging.info("Writing results %s ...", _OUTPUT_TSV_FILE.value)
+  def _sort_by(result: tuple[str, list[str], dict[str, Any]]) -> str:
+    if _SORT_BY.value == "concepts":
+      return result[0]
+    else:
+      return result[2]["glyph.confidence"]
+
+  results = sorted(results, key=_sort_by)
+  logging.info(
+      "Writing results %s (sorting by %s) ...",
+      _OUTPUT_TSV_FILE.value, _SORT_BY.value
+  )
   with open(_OUTPUT_TSV_FILE.value, mode="w") as f:
     f.write("Input concepts\tConcept Pron\tGlyphs\tGlyph Prons\tConfidence\n")
     for input_concepts, output_glyphs, scorer_dict in results:
