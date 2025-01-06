@@ -25,21 +25,19 @@ import glob
 import os
 
 _EXTENSIONS_FILE = flags.DEFINE_string(
-    "extensions_file", None,
+    "extensions_file", "",
     "Path to the text file in TSV format containing glyph extensions.",
-    required=True
+)
+
+_SVG_SRC_DIR = flags.DEFINE_string(
+    "svg_src_dir", "",
+    "Directory containing source graphics in SVG format for the glyph "
+    "extensions.",
 )
 
 _OUTPUT_HTML_DIR = flags.DEFINE_string(
     "output_html_dir", None,
     "Path to output directory for `index.html`.",
-    required=True
-)
-
-_SVG_SRC_DIR = flags.DEFINE_string(
-    "svg_src_dir", None,
-    "Directory containing source graphics in SVG format for the glyph "
-    "extensions.",
     required=True
 )
 
@@ -150,8 +148,12 @@ def make_html() -> None:
     os.makedirs(output_svg_dir, exist_ok=True)
 
   # Create index page.
+  if not _EXTENSIONS_FILE.value:
+    raise ValueError("Specify --extensions_file!")
   concepts = _compose_page(_EXTENSIONS_FILE.value, _OUTPUT_HTML_DIR.value)
 
   # Copy graphics.
+  if not _SVG_SRC_DIR.value:
+    raise ValueError("Specify --svg_src_dir!")
   logging.info("Copying %d SVGs from %s ...", len(concepts), _SVG_SRC_DIR.value)
   _copy_svgs(concepts, _SVG_SRC_DIR.value, output_svg_dir)
