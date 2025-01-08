@@ -135,3 +135,26 @@ def copy_dir(source_dir: str, target_dir: str) -> None:
     if not os.path.isdir(path):
       source_paths.append(path)
   copy_files(source_paths, target_dir)
+
+
+def list_subdirs(root_dir: str) -> list[str]:
+  """Retrieves all subdirectories under the specified root.
+
+  Root directory must exist.
+
+  Args:
+    root_dir: Root directory.
+
+  Returns:
+    A list of subdirectories (may be empty).
+  """
+  if not os.path.isdir(root_dir):
+    raise ValueError(f"Source directory {root_dir} does not exist!")
+
+  logging.info("Searching for subdirs of `%s` ...", root_dir)
+  subdir_paths = []
+  for path in glob.glob(f"{root_dir}/*"):
+    if os.path.isdir(path):
+      subdir_paths.append(path)
+
+  return subdir_paths
