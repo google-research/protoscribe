@@ -48,6 +48,16 @@ PHONETIC_MODEL = flags.DEFINE_enum(
     "Type of the phonetic model to use."
 )
 
+SEMANTICS_XID = flags.DEFINE_string(
+    "semantics_xid", None,
+    "XManager job ID for the inference run with semantics model for this round."
+)
+
+PHONETICS_XID = flags.DEFINE_string(
+    "phonetics_xid", None,
+    "XManager job ID for the inference run with phonetics model for this round."
+)
+
 
 def experiment_dir() -> str:
   """Returns fully-qualified experiment directory path."""
