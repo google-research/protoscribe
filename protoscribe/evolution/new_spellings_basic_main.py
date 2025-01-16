@@ -84,6 +84,10 @@ def main(unused_argv):
   # update the lists of seen and unseen concepts.
   spellings = []
   if _PREVIOUS_SPELLINGS.value:
+    logging.info(
+        "Reading previous round spellings from %s ...",
+        _PREVIOUS_SPELLINGS.value
+    )
     with open(_PREVIOUS_SPELLINGS.value) as s:
       spellings = [l.strip() for l in s.readlines()]
   for concept, glyph, _, _, _ in glyphs:

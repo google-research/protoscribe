@@ -32,28 +32,32 @@ DEFAULT_TOP_PERCENTAGE = 70
 DEFAULT_MAX_CUMULATIVE_PROBABILITY = 1.
 
 
-class Method(enum.IntEnum):
-  """Method for pruning the list of best hypotheses for the test set."""
+class Method(enum.StrEnum):
+  """Method for pruning the list of best hypotheses for the test set.
+
+  Needs to be derived from `StrEnum` because we use this in flags which are
+  passed around as strings both parsed and unparsed.
+  """
   # No pruning. Pass through all the results.
-  NONE = 0
+  NONE = "none"
 
   # Prune all the candidates below a certain confidence threshold, which is
   # interpreted as an absolute value.
-  THRESHOLD = 1
+  THRESHOLD = "threshold"
 
   # Convert the absolute confidence values to distribution over the test set
   # and prune by probability threshold.
-  PROBABILITY = 2
+  PROBABILITY = "probability"
 
   # Keep top-K best results according to absolute value of the confidence.
-  TOP_K = 3
+  TOP_K = "top_k"
 
   # Keep given percentage of the best results.
-  TOP_PERCENTAGE = 4
+  TOP_PERCENTAGE = "top_percentage"
 
   # Finds the top results with cumulative probability mass smaller than a
   # specified probability threshold (technique from nucleus sampling).
-  TOP_P = 5
+  TOP_P = "top_p"
 
 
 def confidence(results: dict[str, Any]) -> float:
