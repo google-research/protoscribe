@@ -20,22 +20,27 @@ from protoscribe.language.embeddings import embedder
 from protoscribe.language.phonology import phoible_segments
 from protoscribe.language.phonology import phonetic_embeddings
 
-_EMBEDDINGS = flags.DEFINE_string(
-    "embeddings", None, "Path to input embeddings.", required=True
+_INPUT_EMBEDDINGS_FILE = flags.DEFINE_string(
+    "input_embeddings_file", None,
+    "Path to the input embeddings file in TSV format.",
+    required=True
 )
-_DISTANCES = flags.DEFINE_string(
-    "distances", None, "Path to output distances.", required=True
+
+_OUTPUT_DISTANCES_FILE = flags.DEFINE_string(
+    "output_distances_file", None,
+    "Path to output distances.",
+    required=True
 )
+
 _PHOIBLE_PATH = flags.DEFINE_string(
-    "phoible_path", phoible_segments.PHOIBLE, "Path to Phoible segments."
+    "phoible_path", phoible_segments.PHOIBLE, "Path to PHOIBLE segments."
 )
+
 _PHOIBLE_FEATURES_PATH = flags.DEFINE_string(
     "phoible_features_path",
     phoible_segments.PHOIBLE_FEATURES,
-    "Path to Phoible features.",
+    "Path to PHOIBLE features.",
 )
-
-FLAGS = flags.FLAGS
 
 
 def main(unused_argv):
@@ -47,8 +52,8 @@ def main(unused_argv):
       phoible_seg=phoible,
       embedding_len=embedder.DEFAULT_EMBEDDING_DIM,
   )
-  embeddings.read_embeddings(_EMBEDDINGS.value)
-  embeddings.dump_all_distances(_DISTANCES.value)
+  embeddings.read_embeddings(_INPUT_EMBEDDINGS_FILE.value)
+  embeddings.dump_all_distances(_OUTPUT_DISTANCES_FILE.value)
 
 
 if __name__ == "__main__":

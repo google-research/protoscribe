@@ -217,7 +217,7 @@ class PhoneticEmbeddings:
         self._embeddings[w] = emb
     self._initialized = True
 
-  def dump_all_distances(self, path: str):
+  def dump_all_distances(self, path: str) -> None:
     """Dumps all distances so that we can study the shape of the distribution.
 
     Last written line is the means for each of the |V| distances.
@@ -235,6 +235,8 @@ class PhoneticEmbeddings:
         distances.append((self.distance(e1, e2), k2))
       distances.sort()
       all_distances.append((k1, distances))
+
+    logging.info("Dumping phonetic distances to %s ...", path)
     with open(path, "w") as s:
       just_distances = []
       for k1, distances in all_distances:
