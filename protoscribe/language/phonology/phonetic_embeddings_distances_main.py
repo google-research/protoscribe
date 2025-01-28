@@ -14,9 +14,10 @@
 
 """Computes sorted distance vectors for all embeddings."""
 
+from collections.abc import Sequence
+
 from absl import app
 from absl import flags
-from protoscribe.language.embeddings import embedder
 from protoscribe.language.phonology import phoible_segments
 from protoscribe.language.phonology import phonetic_embeddings
 
@@ -43,16 +44,16 @@ _PHOIBLE_FEATURES_PATH = flags.DEFINE_string(
 )
 
 
-def main(unused_argv):
-  phoible = phoible_segments.PhoibleSegments(
-      path=_PHOIBLE_PATH.value,
-      features_path=_PHOIBLE_FEATURES_PATH.value,
+def main(argv: Sequence[str]) -> None:
+  if len(argv) > 1:
+    raise app.UsageError("Too many command-line arguments.")
+
+  # Load phonetic embeddings.
+  embeddings = phonetic_embeddings.load_phonetic_embedder(
+      embeddings_file_path=_INPUT_EMBEDDINGS_FILE.value,
+      phoible_phonemes_path=_PHOIBLE_PATH.value,
+      phoible_features_path=_PHOIBLE_FEATURES_PATH.value
   )
-  embeddings = phonetic_embeddings.PhoneticEmbeddings(
-      phoible_seg=phoible,
-      embedding_len=embedder.DEFAULT_EMBEDDING_DIM,
-  )
-  embeddings.read_embeddings(_INPUT_EMBEDDINGS_FILE.value)
   embeddings.dump_all_distances(_OUTPUT_DISTANCES_FILE.value)
 
 

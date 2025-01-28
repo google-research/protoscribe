@@ -241,15 +241,26 @@ def load_phonetic_forms(
       raise ValueError("Main lexicon file not specified!")
 
   logging.info("Loading main lexicon from %s ...", main_lexicon_file)
+  pos_collisions = set()
   with open(main_lexicon_file) as s:
     for line in s:
       conc, phon = line.strip("\n").split("\t")
       # TODO: This will fail if we have the same term with two different
       # parts of speech.
       word = conc.split("_")[0]
+      if word in pronunciation_lexicon:
+        pos_collisions.add(word)
       pronunciation_lexicon[word] = phon.split()
       if seen_concepts and conc in seen_concepts:
         seen_phonetic_forms.add(phon)
+
+  # Removing parts-of-speech results in key collisions. Print these words,
+  # if any.
+  if pos_collisions:
+    logging.warning(
+        "Removing POS from concepts results in pronunciation "
+        "collisions for: %s", pos_collisions
+    )
 
   if not number_lexicon_file:
     number_lexicon_file = _NUMBER_LEXICON.value
