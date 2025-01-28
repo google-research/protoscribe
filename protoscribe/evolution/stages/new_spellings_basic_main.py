@@ -149,7 +149,7 @@ def main(argv: Sequence[str]) -> None:
         round_data_dir, "glyph_extensions_svg"
     )
     if not os.path.exists(output_glyph_graphics_dir):
-      os.makedirs(output_glyph_graphics_dir, exist_ok=True)
+      os.makedirs(output_glyph_graphics_dir)
     args.extend([
         "--output_glyph_graphics_dir", svg_temp_dir.name
     ])

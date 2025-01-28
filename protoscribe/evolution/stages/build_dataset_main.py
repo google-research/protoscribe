@@ -86,7 +86,7 @@ def _setup_builder(round_data_dir: str) -> list[tuple[str, Any]]:
     # language definitions from the previous round.
     logging.info("Making %s ...", round_data_dir)
     language_dir = os.path.join(round_data_dir, "language")
-    os.makedirs(language_dir, exist_ok=True)
+    os.makedirs(language_dir)
     file_utils.copy_dir(
         os.path.join(previous_data_dir, "language"), language_dir
     )
@@ -116,7 +116,7 @@ def _setup_builder(round_data_dir: str) -> list[tuple[str, Any]]:
 
   # At this stage it is safe to do this again.
   if not os.path.isdir(round_data_dir):
-    os.makedirs(round_data_dir, exist_ok=True)
+    os.makedirs(round_data_dir)
   logging.info(
       "Created `%s` for outputs for round %d.", round_data_dir, round_id
   )

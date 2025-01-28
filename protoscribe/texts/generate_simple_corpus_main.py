@@ -88,7 +88,7 @@ def main(argv: Sequence[str]) -> None:
   params_dir = f"{initial_dir}/params"
   concepts_dir = f"{_SRC_DIR}/data/concepts"
   if not os.path.exists(params_dir):
-    os.makedirs(params_dir, exist_ok=True)
+    os.makedirs(params_dir)
 
   # Generate lexicon resources.
   logging.info("Generating the lexicon with ALL concepts in %s ...", params_dir)
@@ -116,7 +116,7 @@ def main(argv: Sequence[str]) -> None:
   # Now generate the accounting texts.
   output_dir = f"{initial_dir}/output"
   if not os.path.exists(output_dir):
-    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(output_dir)
   for set_idx in range(_NUM_SETS.value):
     logging.info("Generating accounting texts set %d ...", set_idx)
     subprocess_utils.run_subprocess(

@@ -117,7 +117,7 @@ def _sketches_and_glyphs_for_model_type(
     images_dir = os.path.join(output_dir, "images")
     logging.info("Copying sketches to %s ...", images_dir)
     if not os.path.exists(images_dir):
-      os.makedirs(images_dir, exist_ok=True)
+      os.makedirs(images_dir)
     file_utils.copy_dir(temp_dir_name, images_dir)
 
 
