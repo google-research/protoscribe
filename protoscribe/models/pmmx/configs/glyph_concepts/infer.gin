@@ -1,0 +1,39 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from __gin__ import dynamic_registration
+
+import __main__ as infer_script
+from protoscribe.sketches.inference import json_utils
+from t5x import utils
+
+include "protoscribe/pmmx/configs/runs/infer.gin"
+
+utils.DatasetConfig:
+  mixture_or_task_name = %INFER_EVAL_TASK
+
+infer_script.infer:
+  mode = "predict_with_aux"
+  write_fn = @json_utils.write_inferences_to_file
+  merge_fn = @infer_script.merge_chunks_to_file
+
+json_utils.write_inferences_to_file:
+  include_all_inputs = False
+  input_fields_to_include = [
+    "doc.id",
+    "concept.name",
+    "number.name",
+    "text.sampa",
+    "text.words",
+  ]
