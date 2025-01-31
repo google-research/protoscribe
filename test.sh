@@ -47,6 +47,7 @@ INDIVIDUAL_COMPONENTS=(
   "protoscribe/language/morphology/numbers_test.py"
   "protoscribe/language/phonology"
   "protoscribe/language/syntax"
+  "protoscribe/models"
   "protoscribe/pmmx"
   "protoscribe/scoring"
   "protoscribe/semantics"
