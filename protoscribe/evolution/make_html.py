@@ -145,7 +145,9 @@ def make_html() -> None:
   output_svg_dir = os.path.join(_OUTPUT_HTML_DIR.value, "svgs")
   if not os.path.exists(output_svg_dir):
     logging.info("Making directory %s ...", output_svg_dir)
-    os.makedirs(output_svg_dir)
+    os.makedirs(
+        output_svg_dir, exist_ok=True
+    )
 
   # Create index page.
   if not _EXTENSIONS_FILE.value:

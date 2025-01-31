@@ -238,7 +238,9 @@ def _prepare_language_components() -> None:
   language_dir = os.path.join(output_dir, "language")
   logging.info("Language directory: %s", language_dir)
   if not os.path.exists(language_dir):
-    os.makedirs(language_dir)
+    os.makedirs(
+        language_dir, exist_ok=True
+    )
 
   # Copy these files that are copyable verbatim.
   file_utils.copy_src_file("texts/configs", _NUMBER_CONFIG.value, language_dir)

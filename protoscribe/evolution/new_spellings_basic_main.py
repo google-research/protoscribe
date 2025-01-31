@@ -72,7 +72,7 @@ def main(unused_argv):
   # Create a summary of all the extensions in this round.
   output_dir = os.path.join(_DATA_LOCATION.value, "inference_extensions")
   if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+    os.makedirs(output_dir, exist_ok=True)
   extensions_path = os.path.join(output_dir, "extensions.tsv")
   logging.info("Writing extensions to %s ...", extensions_path)
   with open(extensions_path, "w") as s:
