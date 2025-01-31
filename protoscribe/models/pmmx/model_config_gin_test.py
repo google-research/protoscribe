@@ -51,6 +51,7 @@ class ModelConfigGinTest(parameterized.TestCase):
 
   @parameterized.parameters(
       "glyph_concepts",
+      "glyph_logmel-spectrum",
       "glyph_phonemes",
   )
   def test_model_train(self, model_dir: str) -> None:
@@ -75,6 +76,7 @@ class ModelConfigGinTest(parameterized.TestCase):
 
   @parameterized.parameters(
       "glyph_concepts",
+      "glyph_logmel-spectrum",
       "glyph_phonemes",
   )
   def test_model_infer(self, model_dir: str) -> None:
