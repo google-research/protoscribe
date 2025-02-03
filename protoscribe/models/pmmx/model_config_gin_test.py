@@ -53,6 +53,7 @@ class ModelConfigGinTest(parameterized.TestCase):
       "glyph_concepts",
       "glyph_logmel-spectrum",
       "glyph_phonemes",
+      "sketch-token_concepts",
   )
   def test_model_train(self, model_dir: str) -> None:
     """Tests tiny model configuration for training."""
@@ -78,6 +79,7 @@ class ModelConfigGinTest(parameterized.TestCase):
       "glyph_concepts",
       "glyph_logmel-spectrum",
       "glyph_phonemes",
+      "sketch-token_concepts",
   )
   def test_model_infer(self, model_dir: str) -> None:
     """Tests tiny model configuration in inference mode."""

@@ -1,0 +1,45 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Standard t5x temperature sampling.
+#
+# This can either top-K or nucleus (top-P). See
+#  Holtzman, A., Buys, J., Du, L., Forbes, M., & Choi, Y. (2020). ``The Curious
+#  Case of Neural Text Degeneration.''. In International Conference on Learning
+#  Representations. https://openreview.net/forum?id=rygGQyrFvH
+
+from __gin__ import dynamic_registration
+
+from protoscribe.pmmx import models
+from t5x import decoding
+
+# If non-zero only use the top-k logits to sample next token, otherwise don't
+# use any cutoff and sample from full logits over vocabulary. Both TOPK and
+# TOPP defined below cannot be non-zero.
+SAMPLING_TOPK = 0
+
+# If non-zero, only use the smallest number of logits whose cumulative sum of
+# probs adds up to (at least) TOPP.
+SAMPLING_TOPP = 0.4
+
+# Sampling temperature.
+TEMPERATURE = 0.6
+
+models.MultimodalEncoderDecoderModel:
+  decode_fn = @decoding.temperature_sample
+
+decoding.temperature_sample:
+  topk = %SAMPLING_TOPK
+  topp = %SAMPLING_TOPP
+  temperature = %TEMPERATURE
