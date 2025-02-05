@@ -14,12 +14,20 @@
 
 r"""A tool for sampling from the dataset.
 
+This focuses on sampling the glyph representations and then testing that various
+associated reconstructions in form of raster images and vector graphics make
+sense.
+
 Example:
 --------
+DATASET_DIR=...
 python protoscribe/corpus/tools/sample_from_corpus_main.py \
-  --sample_size 100 --max_stroke_sequence_length 1000 --split test \
+  --dataset_dir "${DATASET_DIR}" \
+  --sample_size 100 \
+  --max_stroke_sequence_length 1000 \
+  --split test \
   --stroke_normalization_type "z-standardize" \
-  --tokenizer_vocab_file protoscribe/data/glyphs/tokenizer/generic/vocab2048_normalized_sketchrnn.npy \
+  --stroke_tokenizer_vocab_file protoscribe/data/glyphs/tokenizer/generic/vocab2048_normalized_sketchrnn.npy \
   --fast_stroke_tokenizer \
   --output_dir /tmp/tmp \
   --logtostderr
