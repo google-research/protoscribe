@@ -34,8 +34,7 @@ _MODEL_CONFIG_BASE_DIR = (
 
 
 def _config_path(
-    filename: str,
-    config_dir: str = _MODEL_CONFIG_BASE_DIR
+    filename: str, config_dir: str = _MODEL_CONFIG_BASE_DIR
 ) -> str:
   """Returns full path of the specified file name."""
   return os.path.join(
@@ -54,6 +53,7 @@ class ModelConfigGinTest(parameterized.TestCase):
       "glyph_logmel-spectrum",
       "glyph_phonemes",
       "sketch-token_concepts",
+      "sketch-token_logmel-spectrum",
       "sketch-token_phonemes",
   )
   def test_model_train(self, model_dir: str) -> None:
@@ -81,6 +81,7 @@ class ModelConfigGinTest(parameterized.TestCase):
       "glyph_logmel-spectrum",
       "glyph_phonemes",
       "sketch-token_concepts",
+      "sketch-token_logmel-spectrum",
       "sketch-token_phonemes",
   )
   def test_model_infer(self, model_dir: str) -> None:
