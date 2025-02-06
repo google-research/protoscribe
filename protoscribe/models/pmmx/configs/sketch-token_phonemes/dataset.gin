@@ -1,0 +1,86 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Settings for Protoscribe dataset reader using discrete sketch tokens.
+
+from __gin__ import dynamic_registration
+
+from t5x import utils
+
+from protoscribe.corpus.reader import tasks
+
+DATA_DIR = %gin.REQUIRED
+TRAIN_DATA_DIR = %DATA_DIR
+EVAL_DATA_DIR = %DATA_DIR
+INFER_EVAL_DATA_DIR = %DATA_DIR
+
+MAX_STROKE_SEQUENCE_LENGTH = 250
+MAX_PHONETIC_SEQUENCE_LENGTH = 10
+
+tasks.register:
+  concept_embedding_type = "bnc"
+  max_stroke_sequence_length = %MAX_STROKE_SEQUENCE_LENGTH
+  max_glyph_sequence_length = 20
+  max_phonetic_sequence_length = %MAX_PHONETIC_SEQUENCE_LENGTH
+  stroke_random_scale_factor = 0.0
+  stroke_normalization_type = "sketch-rnn"
+  stroke_token_vocab_filename = "vocab2048_normalized_sketchrnn.npy"
+
+train_task/tasks.register:
+  task_name = "bnc_tokens.train"
+  dataset_dir = %TRAIN_DATA_DIR
+  is_training = True
+  noisify_embeddings = True
+  noisify_neftune_alphas = {
+    %tasks.EMBEDDING_PHONETICS: 0.01,
+  }
+
+eval_task/tasks.register:
+  task_name = "bnc_tokens.eval"
+  dataset_dir = %EVAL_DATA_DIR
+  is_training = False
+
+infer_eval_task/tasks.register:
+  task_name = "bnc_tokens.infer_eval"
+  dataset_dir = %INFER_EVAL_DATA_DIR
+  is_training = False
+
+TRAIN_TASK = @train_task/tasks.register()
+EVAL_TASK = @eval_task/tasks.register()
+INFER_EVAL_TASK = @infer_eval_task/tasks.register()
+MIXTURE_OR_TASK_NAME = %TRAIN_TASK
+MIXTURE_OR_TASK_MODULE = "protoscribe.corpus.reader.tasks"
+USE_CACHED_TASKS = False
+
+TASK_FEATURE_LENGTHS = {
+  "text.phonetic_embedding": %MAX_PHONETIC_SEQUENCE_LENGTH,
+  "targets": %MAX_STROKE_SEQUENCE_LENGTH
+}
+
+train/utils.DatasetConfig:
+  mixture_or_task_name = %MIXTURE_OR_TASK_NAME
+  pack = False
+  use_custom_packing_ops = False
+
+train_eval/utils.DatasetConfig:
+  mixture_or_task_name = %EVAL_TASK
+  pack = False
+  shuffle = False
+  use_custom_packing_ops = False
+
+infer_eval/utils.DatasetConfig:
+  mixture_or_task_name = %INFER_EVAL_TASK
+  pack = False
+  shuffle = False
+  use_custom_packing_ops = False
