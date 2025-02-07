@@ -142,17 +142,9 @@ def main(argv: Sequence[str]) -> None:
     args.extend(["--previous_spellings", prev_spellings_file])
 
   # For sketches, we also need to set up the directory for outputing the
-  # actual glyphs as SVGs.
+  # actual glyphs as SVGs. Save to a temp directory for efficiency.
   svg_temp_dir = tempfile.TemporaryDirectory()
   if _MODE.value == "sketch-token":
-    output_glyph_graphics_dir = os.path.join(
-        round_data_dir, "glyph_extensions_svg"
-    )
-    if not os.path.exists(output_glyph_graphics_dir):
-      os.makedirs(
-          output_glyph_graphics_dir,
-          exist_ok=True
-      )
     args.extend([
         "--output_glyph_graphics_dir", svg_temp_dir.name
     ])
@@ -160,10 +152,20 @@ def main(argv: Sequence[str]) -> None:
   # Run the algorithm.
   subprocess_utils.run_subprocess(_NEW_SPELLINGS_TOOL, args=args)
 
-  # Copy the extensions from temp directory.
+  # Copy the extensions from temporary to a round-agnostic global directory.
   if _MODE.value == "sketch-token":
+    output_glyph_graphics_dir = os.path.join(
+        common_flags.experiment_dir(), "glyph_extensions_svg"
+    )
+    if not os.path.exists(output_glyph_graphics_dir):
+      os.makedirs(
+          output_glyph_graphics_dir,
+          exist_ok=True
+      )
     logging.info("Copying glyph SVGs to %s ...", output_glyph_graphics_dir)
     file_utils.copy_dir(svg_temp_dir.name, output_glyph_graphics_dir)
+
+  # Cleanup.
   svg_temp_dir.cleanup()
 
 
