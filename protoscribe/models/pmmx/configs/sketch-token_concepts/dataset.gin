@@ -41,7 +41,7 @@ train_task/tasks.register:
   is_training = True
   noisify_embeddings = True
   noisify_neftune_alphas = {
-    %tasks.EMBEDDING_SEMANTICS: 5.0,
+    %tasks.EMBEDDING_SEMANTICS: 0.01,
   }
 
 eval_task/tasks.register:
