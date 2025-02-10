@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Standard t5x temperature sampling.
+# Standard t5x temperature/top-k/top-p sampling.
 #
 # This can either top-K or nucleus (top-P). See
 #  Holtzman, A., Buys, J., Du, L., Forbes, M., & Choi, Y. (2020). ``The Curious

@@ -12,34 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Standard t5x temperature sampling.
-#
-# This can either top-K or nucleus (top-P). See
-#  Holtzman, A., Buys, J., Du, L., Forbes, M., & Choi, Y. (2020). ``The Curious
-#  Case of Neural Text Degeneration.''. In International Conference on Learning
-#  Representations. https://openreview.net/forum?id=rygGQyrFvH
+# Arithmetic sampling: "Arithmetic Sampling: Parallel Diverse Decoding for Large
+# Language Models" (2023).
+#   Paper: https://proceedings.mlr.press/v202/vilnis23a/vilnis23a.pdf
+#   Implementation: https://github.com/google-research/google-research/tree/master/arithmetic_sampling/
 
 from __gin__ import dynamic_registration
 
+from protoscribe.pmmx import arithmetic_sampling as decoding
 from protoscribe.pmmx import models
-from t5x import decoding
 
 # If non-zero only use the top-k logits to sample next token, otherwise don't
 # use any cutoff and sample from full logits over vocabulary. Both TOPK and
 # TOPP defined below cannot be non-zero.
-SAMPLING_TOPK = 0
+SAMPLING_TOPK = 40
 
 # If non-zero, only use the smallest number of logits whose cumulative sum of
 # probs adds up to (at least) TOPP.
-SAMPLING_TOPP = 0.4
+SAMPLING_TOPP = 0.
 
 # Sampling temperature.
 TEMPERATURE = 0.6
 
 models.MultimodalEncoderDecoderModel:
-  decode_fn = @decoding.temperature_sample
+  decode_fn = @decoding.arithmetic_sample
 
-decoding.temperature_sample:
+decoding.arithmetic_sample:
   topk = %SAMPLING_TOPK
   topp = %SAMPLING_TOPP
   temperature = %TEMPERATURE
