@@ -116,27 +116,11 @@ def json_to_sketch(
   scorer_dict = json_utils.get_scorer_dict(sketch_dict, pronunciation_lexicon)
   input_text, title = _title_from_inputs(scorer_dict)
 
-  nbest_strokes, nbest_polylines = _strokes_from_json(
-      config, sketch_dict, input_text, stroke_stats, stroke_tokenizer
-  )
-
-  if _SAVE_STROKES_IN_JSONL.value:
-    scorer_dict["strokes.nbest.deltas"] = [s.tolist() for s in nbest_strokes]
-
-  # Set the sketch confidence. This may have been propagated by the recognizer
-  # already or needs to be computed from the JSONL.
-  if "sketch.confidence" in sketch_dict["inputs"]:
-    scorer_dict["sketch.confidence"] = (
-        sketch_dict["inputs"]["sketch.confidence"]
-    )
-  else:
-    confidence = 0.
-    if COMBINED_GLYPHS_AND_STROKES.value:
-      confidence = json_utils.get_confidence(sketch_dict)
-    scorer_dict["sketch.confidence"] = confidence
-
+  # Check if glyph predictions are available. These should be present in the
+  # output of the recognizer (in recognizer's JSONLs) or when the sketch
+  # generator runs in the combined mode generating both strokes and discrete
+  # glyphs.
   if RECOGNIZER_JSON.value or COMBINED_GLYPHS_AND_STROKES.value:
-    # When reading from recognizer JSON we also have the glyph predictions.
     names, pronunciations, scores = _glyphs_from_json(
         sketch_dict, input_text, glyph_vocab, pronunciation_lexicon
     )
@@ -159,6 +143,26 @@ def json_to_sketch(
     # Fill in best hypotheses in human-readable form.
     scorer_dict["glyph.names.best"] = " ".join(best_names)
     scorer_dict["glyph.prons.best"] = json_utils.glyph_pron(scorer_dict, k=-1)
+
+  # Process the actual strokes.
+  nbest_strokes, nbest_polylines = _strokes_from_json(
+      config, sketch_dict, input_text, stroke_stats, stroke_tokenizer
+  )
+
+  if _SAVE_STROKES_IN_JSONL.value:
+    scorer_dict["strokes.nbest.deltas"] = [s.tolist() for s in nbest_strokes]
+
+  # Set the sketch confidence. This may have been propagated by the recognizer
+  # already or needs to be computed from the JSONL.
+  if "sketch.confidence" in sketch_dict["inputs"]:
+    scorer_dict["sketch.confidence"] = (
+        sketch_dict["inputs"]["sketch.confidence"]
+    )
+  else:
+    confidence = 0.
+    if COMBINED_GLYPHS_AND_STROKES.value:
+      confidence = json_utils.get_confidence(sketch_dict)
+    scorer_dict["sketch.confidence"] = confidence
 
   # Save vector graphics.
   if _SAVE_SVG.value:
