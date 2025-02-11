@@ -30,7 +30,7 @@ FLAGS = flags.FLAGS
 FLAGS.apply_rdp = False
 
 
-class MakeTextTestTest(parameterized.TestCase, absltest.TestCase):
+class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
 
   @classmethod
   def setUpClass(cls):
