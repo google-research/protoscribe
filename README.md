@@ -71,11 +71,15 @@ The important directories are:
     explaining what a thing is -- these can then be encoded using a pretrained
     language model.
 
-    *   **morphology/phonology/syntax**: Definitions of the phonology, morphology
-    and syntax of the generated language. The core functionality for determining
-    morpheme shape and what it means for two words to sound similar resides in
-    [`phonology`](protoscribe/language/phonology/)
-    and includes libraries for computing phonetic embeddings.
+    *   [phonology](protoscribe/language/phonology):
+    Core phonological configurations for the synthetic languages utilizing
+    [PHOIBLE](https://github.com/phoible/) segment inventories, implementation of
+    phonetic word similarity and a library for computing phonetic embeddings.
+
+    *   [morphology](protoscribe/language/morphology)/[syntax](protoscribe/language/syntax):
+    Finite-state based definitions of the morphology and syntax of the generated
+    language including the inflection paradigms and number grammars. The core
+    functionality for determining morpheme shape.
 
 *   [glyphs](protoscribe/glyphs): Libraries for
     dealing with SVGs, but also with discrete glyph vocabularies, i.e.
