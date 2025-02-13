@@ -73,7 +73,7 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
 
   @flagsaver.flagsaver(deltas=False)
   def testSimplePointConversion(self) -> None:
-    strokes, glyph_affiliations = lib.svg_to_strokes(
+    strokes, glyph_affiliations = lib.svg_file_to_strokes(
         self.rabbit_svg,
     )
 
@@ -87,7 +87,7 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
 
   @flagsaver.flagsaver(deltas=True)
   def testDeltaPointConversion(self) -> None:
-    strokes, glyph_affiliations = lib.svg_to_strokes(
+    strokes, glyph_affiliations = lib.svg_file_to_strokes(
         self.rabbit_svg,
     )
     self.assertEqual(glyph_affiliations, self.rabbit_affiliations)

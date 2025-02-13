@@ -73,7 +73,7 @@ def _get_svg_dimensions() -> tuple[float, float]:
 
 
 def main(unused_argv):
-  strokes, _ = svg_to_strokes_lib.svg_to_strokes(_SVG_FILE.value)
+  strokes, _ = svg_to_strokes_lib.svg_file_to_strokes(_SVG_FILE.value)
   if _OUTPUT_POINTS_FILE.value:
     with open(_OUTPUT_POINTS_FILE.value, "w") as stream:
       svg_to_strokes_lib.print_text(strokes, stream)

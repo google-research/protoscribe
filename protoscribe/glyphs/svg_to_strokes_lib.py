@@ -206,7 +206,7 @@ def _parse_position_and_glyph(
     return -1, None
 
 
-def _svg_to_strokes(
+def svg_to_strokes(
     paths,
     attributes: list[dict[str, str]],
     flip_vertical: bool = True,
@@ -320,7 +320,7 @@ def _svg_to_strokes(
   return strokes, glyph_affiliations
 
 
-def svg_to_strokes(svg_file: str):
+def svg_file_to_strokes(svg_file: str):
   """Converts from SVG file to strokes consisting of points.
 
   Args:
@@ -332,7 +332,7 @@ def svg_to_strokes(svg_file: str):
       - a list of glyph affiliations associated with each stroke.
   """
   paths, attributes = svg2paths(svg_file)
-  return _svg_to_strokes(
+  return svg_to_strokes(
       paths,
       attributes,
       flip_vertical=_FLIP_VERTICAL.value,
@@ -359,7 +359,7 @@ def svg_tree_to_strokes(svg_tree: ET.ElementTree):
   ET.register_namespace("", "http://www.w3.org/2000/svg")
   svg_str = ET.tostring(svg_tree.getroot()).decode("utf8")
   paths, attributes = svgstr2paths(svg_str)
-  return _svg_to_strokes(
+  return svg_to_strokes(
       paths,
       attributes,
       flip_vertical=_FLIP_VERTICAL.value,
@@ -405,7 +405,7 @@ def svg_tree_to_strokes_for_test(
   ET.register_namespace("", "http://www.w3.org/2000/svg")
   svg_str = ET.tostring(svg_tree.getroot()).decode("utf8")
   paths, attributes = svgstr2paths(svg_str)
-  return _svg_to_strokes(
+  return svg_to_strokes(
       paths,
       attributes,
       flip_vertical=flip_vertical,
