@@ -1,0 +1,98 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Multimodal PMMX-One flaxformer architecture.
+
+from __gin__ import dynamic_registration
+
+import seqio
+from flax import linen
+from protoscribe.pmmx import feature_converters
+from protoscribe.pmmx import pmmx_architecture
+
+from flaxformer.architectures.t5 import t5_architecture
+from flaxformer.components import embedding
+
+include "protoscribe/pmmx/configs/architectures/p1_t5_1_1_flaxformer.gin"
+
+# Architecture (Flax Module).
+ARCHITECTURE = @pmmx_architecture.MultimodalEncoderDecoder()
+
+# Vocabulary for the encoder. Available tokenizer vocabs should have
+# sizes set to either:
+#   - 2052 = 2048 + 4 special symbols, or
+#   - 4100 = 4096 + 4 special symbols.
+SKETCH_TOKEN_VOCAB_SIZE = 2052
+END_OF_SKETCH = 3 # sketch_tokenizer.END_OF_SKETCH
+
+inputs/PASSTHROUGH_VOCABULARY = @seqio.PassThroughVocabulary()
+inputs/seqio.PassThroughVocabulary.size = 0
+inputs/seqio.PassThroughVocabulary.eos_id = %END_OF_SKETCH
+
+# Output vocabulary for the decoder. The `GLYPH_TOKEN_VOCAB_SIZE` corresponds
+# to the real glyph token vocabulary size (all the glyphs + the special
+# symbols).
+GLYPH_TOKEN_VOCAB_SIZE = 313
+END_OF_GLYPHS_SEQ = 2 # glyph_vocab.GLYPH_EOS
+
+outputs/PASSTHROUGH_VOCABULARY = @seqio.PassThroughVocabulary()
+outputs/seqio.PassThroughVocabulary.size = 0
+outputs/seqio.PassThroughVocabulary.eos_id = %END_OF_GLYPHS_SEQ
+
+# Token embedder for the encoder.
+encoder_token_embedder/embedding.Embed:
+  num_embeddings = %SKETCH_TOKEN_VOCAB_SIZE
+  features = %ENCODER_EMBED_DIM
+  cast_input_dtype = "int32"
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @token_embedder_init/linen.initializers.normal()
+  one_hot = True
+  name = "encoder_sketch_token_embedder"
+
+# Token embedder for the decoder.
+decoder_token_embedder/embedding.Embed:
+  num_embeddings = %GLYPH_TOKEN_VOCAB_SIZE
+  features = %DECODER_EMBED_DIM
+  cast_input_dtype = "int32"
+  dtype = %ACTIVATION_DTYPE
+  attend_dtype = %ACTIVATION_DTYPE
+  embedding_init = @token_embedder_init/linen.initializers.normal()
+  one_hot = True
+  name = "decoder_glyph_token_embedder"
+
+# Actual multimodal encoder-decoder architecture.
+pmmx_architecture.MultimodalEncoderDecoder:
+  encoder_factory = @pmmx_architecture.MultimodalEncoder
+  decoder_factory = @t5_architecture.Decoder
+  shared_token_embedder_factory = None
+  encoder_token_embedder_factory = @encoder_token_embedder/embedding.Embed
+  decoder_token_embedder_factory = @decoder_token_embedder/embedding.Embed
+  dtype = %ACTIVATION_DTYPE
+
+feature_converters.MultimodalEncDecFeatureConverterFactory:
+  task_feature_lengths = %TASK_FEATURE_LENGTHS
+  feature_specs = (
+      ("inputs", "int32", 1),  # Ignored. Same as `sketch_tokens`.
+      ("sketch_tokens", "int32", 1),
+  )
+
+# Encoder
+pmmx_architecture.MultimodalEncoder:
+  passthrough_features = ["inputs"]
+  feature_spec = [
+    ("sketch_tokens", "text_tokens"),
+  ]
+  modality_spec = ["text_tokens"]
+  modality_embedders_spec = {}

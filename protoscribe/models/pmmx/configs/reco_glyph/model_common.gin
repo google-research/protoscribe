@@ -1,0 +1,74 @@
+# Copyright 2024 The Protoscribe Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Base configuration of the model.
+
+from __gin__ import dynamic_registration
+
+from protoscribe.pmmx import feature_converters
+from protoscribe.pmmx import models
+from t5x import adafactor
+from t5x import utils
+
+ARCHITECTURE = %gin.REQUIRED
+
+include "protoscribe/models/pmmx/configs/reco_glyph/arch_p1_t5_1_1_flaxformer.gin"
+
+# Architecture overrides.
+NUM_ENCODER_LAYERS = %gin.REQUIRED
+NUM_DECODER_LAYERS = %gin.REQUIRED
+NUM_HEADS = %gin.REQUIRED
+HEAD_DIM = %gin.REQUIRED
+ENCODER_EMBED_DIM = %gin.REQUIRED
+DECODER_EMBED_DIM = %gin.REQUIRED
+MLP_DIM = %gin.REQUIRED
+
+# Optimizer
+# `learning_rate` is set by `Trainer.learning_rate_fn`.
+OPTIMIZER = @adafactor.Adafactor()
+adafactor.Adafactor:
+  decay_rate = 0.8
+  step_offset = 0
+
+# Loss defaults.
+Z_LOSS = 0.0001
+LABEL_SMOOTHING = 0.0
+LOSS_NORMALIZING_FACTOR = None
+
+# Model
+MODEL = @models.MultimodalEncoderDecoderModel()
+models.MultimodalEncoderDecoderModel:
+  feature_converter_cls = @feature_converters.MultimodalEncDecFeatureConverterFactory()
+  module = %ARCHITECTURE  # provided by t5_flaxformer
+  input_vocabulary = %inputs/PASSTHROUGH_VOCABULARY
+  output_vocabulary = %outputs/PASSTHROUGH_VOCABULARY
+  optimizer_def = %OPTIMIZER
+  z_loss = %Z_LOSS
+  label_smoothing = %LABEL_SMOOTHING
+  loss_normalizing_factor = %LOSS_NORMALIZING_FACTOR
+
+# Decoding.
+NUM_DECODES = 5
+RETURN_ALL_DECODES = True
+models.MultimodalEncoderDecoderModel.predict_batch_with_aux:
+  num_decodes = %NUM_DECODES
+  return_all_decodes = %RETURN_ALL_DECODES
+
+# Checkpoints
+CHECKPOINT_PERIOD = 20_000
+EVAL_PERIOD = %CHECKPOINT_PERIOD
+utils.SaveCheckpointConfig:
+  period = %CHECKPOINT_PERIOD
+  keep = None  # Keep all checkpoints.
+  save_dataset = False
