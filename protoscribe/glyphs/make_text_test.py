@@ -19,7 +19,7 @@ import tempfile
 
 from absl import flags
 from absl.testing import absltest
-from protoscribe.glyphs import make_text_lib
+from protoscribe.glyphs import make_text
 
 import glob
 import os
@@ -61,9 +61,8 @@ class MakeTextTest(absltest.TestCase):
     cls.golden_for_strokes = _load_svg(cls.golden_for_strokes_path)
 
   def testSvgMatch(self) -> None:
-    svg, svg_for_strokes, _, _ = make_text_lib.concat_svgs(
-        self.svgs,
-        self.glyphs,
+    svg, svg_for_strokes, _, _ = make_text.concat_svgs(
+        self.svgs, self.glyphs,
     )
     if _GENERATE_GOLDEN.value:
       svg.write(self.golden_path)

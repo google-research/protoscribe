@@ -30,7 +30,7 @@ import logging
 from absl import app
 from absl import flags
 from protoscribe.glyphs import glyph_vocab as glyph_lib
-from protoscribe.glyphs import make_text_lib
+from protoscribe.glyphs import make_text
 from protoscribe.glyphs import vector_to_raster as raster_lib
 
 _CONCEPTS = flags.DEFINE_list(
@@ -80,9 +80,8 @@ def main(unused_argv):
     raise ValueError("No glyphs found!")
 
   logging.info("Composing %d glyphs ...", len(svgs))
-  concat, concat_for_strokes, width, height = make_text_lib.concat_svgs(
-      svgs,
-      glyphs=_CONCEPTS.value,
+  concat, concat_for_strokes, width, height = make_text.concat_svgs(
+      svgs, glyphs=_CONCEPTS.value,
   )
 
   # Save vector graphics format.

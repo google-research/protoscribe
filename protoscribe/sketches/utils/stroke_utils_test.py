@@ -21,7 +21,7 @@ import os
 from absl import flags
 from absl.testing import absltest
 import numpy as np
-from protoscribe.glyphs import make_text_lib
+from protoscribe.glyphs import make_text
 from protoscribe.glyphs import svg_to_strokes_lib as strokes_lib
 from protoscribe.sketches.utils import stroke_utils as lib
 
@@ -43,7 +43,7 @@ class StrokeUtilsTest(absltest.TestCase):
     """Tests the point generation build-time API."""
 
     glyph_path = os.path.join(FLAGS.test_srcdir, _TEST_DATA_DIR, "field.svg")
-    _, svg_for_strokes, _, _ = make_text_lib.concat_svgs(
+    _, svg_for_strokes, _, _ = make_text.concat_svgs(
         [glyph_path], ["field"]
     )
     strokes, glyph_affiliations = strokes_lib.svg_tree_to_strokes_for_test(

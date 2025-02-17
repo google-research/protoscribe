@@ -23,7 +23,7 @@ from absl import flags
 from protoscribe.corpus.builder import prepare_utils as utils
 from protoscribe.corpus.builder import vision_features_reader as vision
 from protoscribe.glyphs import glyph_vocab as glyph_lib
-from protoscribe.glyphs import make_text_lib
+from protoscribe.glyphs import make_text
 from protoscribe.glyphs import numbers_to_glyphs
 from protoscribe.glyphs import svg_to_strokes_lib as strokes_lib
 from protoscribe.language.embeddings import embedder
@@ -49,14 +49,14 @@ _PREFER_CONCEPT_SVG = flags.DEFINE_bool(
     "This option should be enabled for evolution rounds > 0."
 )
 
-# Set the default flags for `make_text_lib` and `strokes_lib` here. Please
+# Set the default flags for `make_text` and `strokes_lib` here. Please
 # note, the Ramer-Douglas-Peucker (RDP) tolerance for stroke pruning is set
 # to something similar to Sketch-RNN value for QuickDraw and similar datasets
 # (aggressive pruning).
 
-make_text_lib.FLAGS.random_resize = True
-make_text_lib.FLAGS.random_rotate = True
-make_text_lib.FLAGS.random_pad = True
+make_text.FLAGS.random_resize = True
+make_text.FLAGS.random_rotate = True
+make_text.FLAGS.random_pad = True
 strokes_lib.FLAGS.points_per_segment = 100
 strokes_lib.FLAGS.flip_vertical = False
 strokes_lib.FLAGS.deltas = True
@@ -153,7 +153,7 @@ def _build_strokes(
       svgs.append(path_and_variant_id[0])
 
   # Combine SVGs (for multiglyphs) and generate stroke data.
-  _, svg_for_strokes, _, _ = make_text_lib.concat_svgs(svgs, glyph_names)
+  _, svg_for_strokes, _, _ = make_text.concat_svgs(svgs, glyph_names)
   strokes, stroke_glyph_affiliations = strokes_lib.svg_tree_to_strokes(
       svg_for_strokes
   )
