@@ -32,7 +32,7 @@ from protoscribe.language.syntax import phrase as phrase_lib
 from protoscribe.semantics import concept_glosses as gloss_lib
 from protoscribe.sketches.utils import stroke_stats as stroke_stats_lib
 from protoscribe.sketches.utils import stroke_utils
-from protoscribe.texts import generate_lib
+from protoscribe.texts import generate as generate_lib
 import tensorflow as tf
 
 import glob

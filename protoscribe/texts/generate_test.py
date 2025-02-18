@@ -18,7 +18,7 @@ import os
 
 from absl import flags
 from absl.testing import absltest
-from protoscribe.texts import generate_lib as gen
+from protoscribe.texts import generate as gen
 
 import glob
 import os

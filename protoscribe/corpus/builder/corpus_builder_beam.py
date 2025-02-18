@@ -23,7 +23,7 @@ import numpy as np
 from protoscribe.corpus.builder import document_builder
 from protoscribe.corpus.builder import speech_pipeline as speech
 from protoscribe.sketches.utils import stroke_stats as stroke_stats_lib
-from protoscribe.texts import generate_lib
+from protoscribe.texts import generate as generate_lib
 import tensorflow as tf
 
 FLAGS = flags.FLAGS

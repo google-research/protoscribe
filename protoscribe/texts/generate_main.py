@@ -19,7 +19,7 @@ One can then use this to generate texts in the language.
 
 from absl import app
 from absl import flags
-from protoscribe.texts import generate_lib
+from protoscribe.texts import generate
 
 _GENERATE_LEXICAL_RESOURCES = flags.DEFINE_bool(
     "generate_lexical_resources", False,
@@ -28,7 +28,7 @@ _GENERATE_LEXICAL_RESOURCES = flags.DEFINE_bool(
 
 
 def main(unused_argv):
-  generator = generate_lib.TextGenerator()
+  generator = generate.TextGenerator()
   if _GENERATE_LEXICAL_RESOURCES.value:
     generator.generate_lexical_resources()
   else:

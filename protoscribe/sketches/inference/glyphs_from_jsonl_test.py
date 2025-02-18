@@ -22,7 +22,7 @@ from absl.testing import absltest
 from protoscribe.corpus.reader import dataset_defaults as ds_lib
 from protoscribe.sketches.inference import glyphs_from_jsonl as lib
 from protoscribe.sketches.inference import json_utils
-from protoscribe.texts import generate_lib
+from protoscribe.texts import generate as generate_lib
 
 FLAGS = flags.FLAGS
 

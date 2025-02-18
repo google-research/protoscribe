@@ -71,7 +71,7 @@ from protoscribe.glyphs import numbers_to_glyphs
 from protoscribe.language.embeddings import embedder as embedder_lib
 from protoscribe.language.phonology import phonetic_embeddings as phonetic_embedder_lib
 from protoscribe.language.phonology import sampa as sampa_lib
-from protoscribe.texts import generate_lib
+from protoscribe.texts import generate as generate_lib
 
 import glob
 import os

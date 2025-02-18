@@ -27,7 +27,7 @@ from absl import app
 from absl import flags
 from protoscribe.language.phonology import phoible_segments
 from protoscribe.language.phonology import phonetic_embeddings
-from protoscribe.texts import generate_lib
+from protoscribe.texts import generate as generate_lib
 
 import glob
 import os
