@@ -25,7 +25,7 @@ from protoscribe.corpus.builder import vision_features_reader as vision
 from protoscribe.glyphs import glyph_vocab as glyph_lib
 from protoscribe.glyphs import make_text
 from protoscribe.glyphs import numbers_to_glyphs
-from protoscribe.glyphs import svg_to_strokes_lib as strokes_lib
+from protoscribe.glyphs import svg_to_strokes
 from protoscribe.language.embeddings import embedder
 from protoscribe.language.phonology import phonetic_embeddings as phon_embed_lib
 from protoscribe.language.syntax import phrase as phrase_lib
@@ -49,7 +49,7 @@ _PREFER_CONCEPT_SVG = flags.DEFINE_bool(
     "This option should be enabled for evolution rounds > 0."
 )
 
-# Set the default flags for `make_text` and `strokes_lib` here. Please
+# Set the default flags for `make_text` and `svg_to_strokes` here. Please
 # note, the Ramer-Douglas-Peucker (RDP) tolerance for stroke pruning is set
 # to something similar to Sketch-RNN value for QuickDraw and similar datasets
 # (aggressive pruning).
@@ -57,12 +57,12 @@ _PREFER_CONCEPT_SVG = flags.DEFINE_bool(
 make_text.FLAGS.random_resize = True
 make_text.FLAGS.random_rotate = True
 make_text.FLAGS.random_pad = True
-strokes_lib.FLAGS.points_per_segment = 100
-strokes_lib.FLAGS.flip_vertical = False
-strokes_lib.FLAGS.deltas = True
-strokes_lib.FLAGS.apply_rdp = True
-strokes_lib.FLAGS.rdp_tolerance = 2.0
-strokes_lib.FLAGS.path_is_stroke = True
+svg_to_strokes.FLAGS.points_per_segment = 100
+svg_to_strokes.FLAGS.flip_vertical = False
+svg_to_strokes.FLAGS.deltas = True
+svg_to_strokes.FLAGS.apply_rdp = True
+svg_to_strokes.FLAGS.rdp_tolerance = 2.0
+svg_to_strokes.FLAGS.path_is_stroke = True
 
 
 @dataclasses.dataclass
@@ -154,7 +154,7 @@ def _build_strokes(
 
   # Combine SVGs (for multiglyphs) and generate stroke data.
   _, svg_for_strokes, _, _ = make_text.concat_svgs(svgs, glyph_names)
-  strokes, stroke_glyph_affiliations = strokes_lib.svg_tree_to_strokes(
+  strokes, stroke_glyph_affiliations = svg_to_strokes.svg_tree_to_strokes(
       svg_for_strokes
   )
   return strokes, stroke_glyph_affiliations, num_concept_glyphs

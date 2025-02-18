@@ -19,7 +19,7 @@ from absl import flags
 from absl.testing import absltest
 from absl.testing import flagsaver
 from absl.testing import parameterized
-from protoscribe.glyphs import svg_to_strokes_lib as lib
+from protoscribe.glyphs import svg_to_strokes as lib
 
 import glob
 import os

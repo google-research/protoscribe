@@ -19,7 +19,7 @@ import xml.etree.ElementTree as ET
 
 from absl import app
 from absl import flags
-from protoscribe.glyphs import svg_to_strokes_lib
+from protoscribe.glyphs import svg_to_strokes
 from protoscribe.glyphs import vector_to_raster as raster_lib
 
 import glob
@@ -73,10 +73,10 @@ def _get_svg_dimensions() -> tuple[float, float]:
 
 
 def main(unused_argv):
-  strokes, _ = svg_to_strokes_lib.svg_file_to_strokes(_SVG_FILE.value)
+  strokes, _ = svg_to_strokes.svg_file_to_strokes(_SVG_FILE.value)
   if _OUTPUT_POINTS_FILE.value:
     with open(_OUTPUT_POINTS_FILE.value, "w") as stream:
-      svg_to_strokes_lib.print_text(strokes, stream)
+      svg_to_strokes.print_text(strokes, stream)
 
   if _OUTPUT_PNG_FILE.value:
     # Massage the points into the format expected by the `raster_lib` API below.

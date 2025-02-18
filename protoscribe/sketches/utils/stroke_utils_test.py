@@ -22,7 +22,7 @@ from absl import flags
 from absl.testing import absltest
 import numpy as np
 from protoscribe.glyphs import make_text
-from protoscribe.glyphs import svg_to_strokes_lib as strokes_lib
+from protoscribe.glyphs import svg_to_strokes
 from protoscribe.sketches.utils import stroke_utils as lib
 
 import glob
@@ -46,7 +46,7 @@ class StrokeUtilsTest(absltest.TestCase):
     _, svg_for_strokes, _, _ = make_text.concat_svgs(
         [glyph_path], ["field"]
     )
-    strokes, glyph_affiliations = strokes_lib.svg_tree_to_strokes_for_test(
+    strokes, glyph_affiliations = svg_to_strokes.svg_tree_to_strokes_for_test(
         svg_for_strokes, points_per_segment=_POINTS_PER_SEGMENT
     )
     num_strokes = len(strokes)

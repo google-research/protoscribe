@@ -21,7 +21,7 @@ from absl import flags
 from absl.testing import absltest
 import ml_collections
 from protoscribe.corpus.reader import stroke_parser as lib
-from protoscribe.glyphs import svg_to_strokes_lib as strokes_lib
+from protoscribe.glyphs import svg_to_strokes
 from protoscribe.sketches.utils import stroke_stats as stroke_stats_lib
 from protoscribe.sketches.utils import stroke_utils
 import tensorflow as tf
@@ -103,7 +103,7 @@ class ProtoscribeDatasetTest(tf.test.TestCase):
     )
     rabbit = ET.parse(rabbit_svg_path)
     strokes, stroke_glyph_affiliations = (
-        strokes_lib.svg_tree_to_strokes_for_test(
+        svg_to_strokes.svg_tree_to_strokes_for_test(
             rabbit,
             # Important: Same settings as in the corpus builder.
             flip_vertical=False,
