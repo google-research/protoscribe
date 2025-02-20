@@ -34,6 +34,11 @@ _MAX_STROKE_POINTS = flags.DEFINE_integer(
     "statistics for stroke normalization."
 )
 
+STROKE_WIDTH = flags.DEFINE_float(
+    "stroke_width", 5.0,
+    "Stroke width used when generating SVG from individual strokes."
+)
+
 # End of stroke value.
 END_OF_STROKE = 1_000_000
 
@@ -214,21 +219,15 @@ def stroke3_strokes_to_svg(
   buf += "\">\n"
   for lines in polylines:
     path_buf = (
-        "<path style=\"fill: none; "
-        "stroke: #000000; "
-        "mix-blend-mode: source-over; "
-        "stroke-dasharray: none; "
-        "stroke-dashoffset: 0; "
-        "stroke-linecap: round; "
-        "stroke-linejoin: round; "
-        "stroke-miterlimit: 4; "
-        "stroke-opacity: 1; "
-        "stroke-width: 5;\" "
-        f"d=\"M{lines[0][0]} {lines[0][1]}"
+        f"<path d=\"M{lines[0][0]} {lines[0][1]}"
     )
     for i in range(1, lines.shape[0]):
       path_buf += f" L{lines[i][0]} {lines[i][1]}"
-    path_buf += "\"/>\n"
+    path_buf += (
+        "\" fill=\"none\" stroke=\"#000000\" stroke-width=\"%f\" />\n" % (
+            STROKE_WIDTH.value
+        )
+    )
     buf += path_buf
   buf += "</g></svg>\n"
   return buf
