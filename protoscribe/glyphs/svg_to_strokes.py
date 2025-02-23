@@ -19,7 +19,9 @@ import xml.etree.ElementTree as ET
 
 from absl import flags
 import numpy as np
+from protoscribe.glyphs import svg_simplify
 from protoscribe.glyphs import trig
+from svgpathtools.path import Path
 from svgpathtools.svg_to_paths import svg2paths
 from svgpathtools.svg_to_paths import svgstr2paths
 
@@ -198,8 +200,10 @@ def _parse_position_and_glyph(
     attribute: dict[str, str]
 ) -> tuple[int, str | None]:
   """Parses glyph affiliations from the attribute."""
-  if "position_and_glyph" in attribute:
-    position, glyph = attribute["position_and_glyph"].split(",")
+  if svg_simplify.XML_SVG_POSITION_AND_GLYPH in attribute:
+    position, glyph = (
+        attribute[svg_simplify.XML_SVG_POSITION_AND_GLYPH].split(",")
+    )
     position = int(position)
     return position, glyph
   else:
@@ -207,7 +211,7 @@ def _parse_position_and_glyph(
 
 
 def svg_to_strokes(
-    paths,
+    paths: list[Path],
     attributes: list[dict[str, str]],
     flip_vertical: bool = True,
     path_is_stroke: bool = False,
@@ -356,7 +360,7 @@ def svg_tree_to_strokes(svg_tree: ET.ElementTree):
       - a list of lists of x-y points, and
       - a list of glyph affiliations associated with each stroke.
   """
-  ET.register_namespace("", "http://www.w3.org/2000/svg")
+  ET.register_namespace("", svg_simplify.XML_SVG_NAMESPACE)
   svg_str = ET.tostring(svg_tree.getroot()).decode("utf8")
   paths, attributes = svgstr2paths(svg_str)
   return svg_to_strokes(
@@ -402,7 +406,7 @@ def svg_tree_to_strokes_for_test(
       - a list of lists of x-y points, and
       - a list of glyph affiliations associated with each stroke.
   """
-  ET.register_namespace("", "http://www.w3.org/2000/svg")
+  ET.register_namespace("", svg_simplify.XML_SVG_NAMESPACE)
   svg_str = ET.tostring(svg_tree.getroot()).decode("utf8")
   paths, attributes = svgstr2paths(svg_str)
   return svg_to_strokes(
@@ -419,8 +423,7 @@ def svg_tree_to_strokes_for_test(
 
 
 def print_text(
-    strokes: list[list[tuple[float, float]]],
-    stream=sys.stdout
+    strokes: list[list[tuple[float, float]]], stream=sys.stdout
 ) -> None:
   """Utility to print a text as a set of points.
 

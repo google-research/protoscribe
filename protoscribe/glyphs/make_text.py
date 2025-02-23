@@ -22,6 +22,7 @@ import random
 import xml.etree.ElementTree as ET
 
 from absl import flags
+from protoscribe.glyphs import svg_simplify
 
 import glob
 import os
@@ -60,27 +61,42 @@ _VERTICAL_TRANSLATION = flags.DEFINE_integer(
     "Uniform vertical translation to avoid things getting cut off at the top",
 )
 
+_SIMPLIFY_SVG_TREES = flags.DEFINE_boolean(
+    "simplify_svg_trees", False,
+    "Converts the tree to equivalent representation by flattening all the "
+    "paths by removing transforms and adjusting the viewbox to fit all the "
+    "glyphs."
+)
+
 FLAGS = flags.FLAGS
 
 
 def concat_xml_svgs(
     trees: list[ET.ElementTree],
     glyphs: list[str] | None = None,
-) -> tuple[ET.ElementTree, ET.ElementTree, int, int]:
+    clone_trees: bool = False
+) -> tuple[ET.ElementTree, float, float]:
   """Concatenates SVGs.
 
   Args:
-    trees: A list of svgs file paths.
-    glyphs: Names of glyphs. If provided, must be the same length as svgs
+    trees: A list of SVG element trees.
+    glyphs: Names of glyphs. If provided, must be the same length as SVGs
+    clone_trees: Perform deep copy on the input trees if the same tree
+      instances are passed in repeatedly.
 
   Returns:
-    Tuple of concatenated SVG, hacked SVG aimed for svg_for_strokes, width,
-    and height.
+    Tuple of concatenated SVG, width, and height.
   """
 
   if glyphs:
     assert len(glyphs) == len(trees)
     glyphs = list(enumerate(glyphs))
+
+  # Since the element trees are modified by this call, potentially reusing
+  # thw `concat_xml_svg` calls will lead to unexpected results. Perform deep
+  # copy of the passed trees.
+  if clone_trees:
+    trees = [copy.deepcopy(tree) for tree in trees]
 
   # Some of the SVGs lack `width` and `height attributes, in which
   # case we try the `viewBox`.
@@ -104,7 +120,6 @@ def concat_xml_svgs(
     viewbox[-2] = str(w)
     viewbox[-1] = str(h)
     svg_elt.attrib["viewBox"] = " ".join(viewbox)
-    svg_elt.attrib["style"] = f"enable-background:new 0 0 {w} {h}"
 
   def shift_scale_rotate(shift, scale, rotation):
     shift_scale_rotation = (
@@ -118,17 +133,17 @@ def concat_xml_svgs(
       transform = f"{elt.attrib['transform']} {transform}"
     elt.attrib["transform"] = transform
 
-  def random_pad():
+  def random_pad() -> int:
     if not _RANDOM_PAD.value:
       return 0
     return random.randint(1, 5)
 
-  def random_scale():
+  def random_scale() -> float:
     if not _RANDOM_RESIZE.value:
       return 1
     return 0.75 + 0.25 * random.random()
 
-  def random_rotation():
+  def random_rotation() -> float:
     if not _RANDOM_ROTATE.value:
       return 0
     return random.uniform(-10.0, 10.0)
@@ -143,11 +158,8 @@ def concat_xml_svgs(
         to_root.remove(child)
     to_root.append(g)
 
-  def set_black(elt):
-    elt.attrib["fill"] = "#000000"
-
   def find_paths(root):
-    prefix = "{http://www.w3.org/2000/svg}"
+    prefix = "{%s}" % svg_simplify.XML_SVG_NAMESPACE
     path_types = [
         "path",
         "polygon",
@@ -168,12 +180,15 @@ def concat_xml_svgs(
         transform = g.attrib["transform"]
         for path in find_paths(g):
           add_transform(path, transform)
+        del g.attrib["transform"]
 
   def add_glyph_to_paths(root, glyph):
     for path in find_paths(root):
-      path.attrib["position_and_glyph"] = f"{glyph[0]},{glyph[1]}"
+      path.attrib[svg_simplify.XML_SVG_POSITION_AND_GLYPH] = (
+          f"{glyph[0]},{glyph[1]}"
+      )
 
-  ET.register_namespace("", "http://www.w3.org/2000/svg")
+  ET.register_namespace("", svg_simplify.XML_SVG_NAMESPACE)
   main_tree = trees[0]
   main_root = main_tree.getroot()
   # Scale everything to be uniform initially.
@@ -189,8 +204,6 @@ def concat_xml_svgs(
     tree = trees[i]
     glyph = glyphs[i] if glyphs else None
     root = tree.getroot()
-    for elt in root:
-      set_black(elt)
     w, h = get_dimensions(root)
     scale = uniform_height / h * random_scale()
     w, h = w * scale, h * scale
@@ -205,16 +218,19 @@ def concat_xml_svgs(
   w = shift + _EXTRA_PAD.value
   h = max_height + _VERTICAL_TRANSLATION.value + _EXTRA_PAD.value
   set_dimensions(main_root, w, h)
-  tree_for_strokes = copy.deepcopy(main_tree)
-  root_for_strokes = tree_for_strokes.getroot()
-  propagate_transforms_to_paths(root_for_strokes)
-  return main_tree, tree_for_strokes, w, h
+
+  if _SIMPLIFY_SVG_TREES.value:
+    main_tree, _, _ = svg_simplify.simplify_svg_tree(main_tree)
+    w, h = get_dimensions(main_root)
+  else:
+    propagate_transforms_to_paths(main_tree.getroot())
+
+  return main_tree, w, h
 
 
 def concat_svgs(
-    svgs: list[str],
-    glyphs: list[str] | None = None,
-) -> tuple[ET.ElementTree, ET.ElementTree, int, int]:
+    svgs: list[str], glyphs: list[str] | None = None,
+) -> tuple[ET.ElementTree, float, float]:
   """Concatenates SVGs.
 
   Args:
@@ -222,14 +238,15 @@ def concat_svgs(
     glyphs: Names of glyphs. If provided, must be the same length as svgs
 
   Returns:
-    Tuple of concatenated SVG, hacked SVG aimed for svg_for_strokes, width,
-    and height.
+    Tuple of concatenated SVG, width, and height.
   """
+  ET.register_namespace("", svg_simplify.XML_SVG_NAMESPACE)
 
   trees = []
-  ET.register_namespace("", "http://www.w3.org/2000/svg")
   for file_path in svgs:
     f = open(file_path, mode="rt")
-    trees.append(ET.parse(f))
+    svg_tree = ET.parse(f)
+    trees.append(svg_tree)
     f.close()
-  return concat_xml_svgs(trees, glyphs)
+
+  return concat_xml_svgs(trees, glyphs=glyphs, clone_trees=False)

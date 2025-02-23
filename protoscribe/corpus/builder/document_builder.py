@@ -57,6 +57,7 @@ _PREFER_CONCEPT_SVG = flags.DEFINE_bool(
 make_text.FLAGS.random_resize = True
 make_text.FLAGS.random_rotate = True
 make_text.FLAGS.random_pad = True
+make_text.FLAGS.simplify_svg_trees = False
 svg_to_strokes.FLAGS.points_per_segment = 100
 svg_to_strokes.FLAGS.flip_vertical = False
 svg_to_strokes.FLAGS.deltas = True
@@ -153,9 +154,9 @@ def _build_strokes(
       svgs.append(path_and_variant_id[0])
 
   # Combine SVGs (for multiglyphs) and generate stroke data.
-  _, svg_for_strokes, _, _ = make_text.concat_svgs(svgs, glyph_names)
+  svg_tree, _, _ = make_text.concat_svgs(svgs, glyph_names)
   strokes, stroke_glyph_affiliations = svg_to_strokes.svg_tree_to_strokes(
-      svg_for_strokes
+      svg_tree
   )
   return strokes, stroke_glyph_affiliations, num_concept_glyphs
 

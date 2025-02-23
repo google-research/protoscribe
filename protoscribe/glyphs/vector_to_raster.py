@@ -25,10 +25,7 @@ import cairo
 import numpy as np
 import PIL.Image
 import PIL.ImageColor
-
-_STROKE_WIDTH = flags.DEFINE_integer(
-    "stroke_width", 14,
-    "Width of the stroke when generating image.")
+from protoscribe.glyphs import svg_simplify
 
 _RANDOM_LINE_WIDTH = flags.DEFINE_bool(
     "random_line_width", False,
@@ -45,16 +42,21 @@ _ALPHA_CHANNEL = flags.DEFINE_boolean(
 
 def _line_width() -> int:
   """Returns line width in pixels."""
-  line_width = (random.randint(1, _STROKE_WIDTH.value)
-                if _RANDOM_LINE_WIDTH.value else _STROKE_WIDTH.value)
+  stroke_width = int(svg_simplify.STROKE_WIDTH.value)
+  line_width = (
+      random.randint(1, stroke_width)
+      if _RANDOM_LINE_WIDTH.value else stroke_width
+  )
   return line_width
 
 
 def _cairo_bgra_rgba(surface: cairo.ImageSurface) -> PIL.Image.Image:
   """Converts a Cairo surface from default BGRA format to a RBGA string."""
   image = PIL.Image.frombuffer(
-      "RGBA", (surface.get_width(), surface.get_height()),
-      surface.get_data().tobytes(), "raw", "BGRA", 0, 1)
+      "RGBA",
+      (surface.get_width(), surface.get_height()),
+      surface.get_data().tobytes(), "raw", "BGRA", 0, 1
+  )
   return image
 
 
@@ -63,8 +65,11 @@ def _scale_image(
 ) -> PIL.Image.Image:
   """Scales the input image using random factor."""
   input_width, input_height = input_image.size
-  image = PIL.Image.new(input_image.mode, (input_width, input_height),
-                        PIL.ImageColor.getrgb("white"))
+  image = PIL.Image.new(
+      input_image.mode,
+      (input_width, input_height),
+      PIL.ImageColor.getrgb("white")
+  )
   random_scale = 0.5 + 0.5 * random.random()
   new_width = int(input_width * random_scale)
   new_height = int(input_height * random_scale)

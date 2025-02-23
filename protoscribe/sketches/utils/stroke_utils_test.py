@@ -36,19 +36,52 @@ _TEST_DATA_DIR = (
 
 class StrokeUtilsTest(absltest.TestCase):
 
+  def test_stroke3_to_stroke5_roundabout(self):
+    strokes3 = np.array([
+        [1., 1., 0.],
+        [3., 3., 0.],
+        [6., 6., 1.],
+        [8., 8., 0.],
+        [5., 5., 0.],
+        [4., 4., 0.],
+        [2., 2., 0.],
+        [0., 0., 1.],
+    ], dtype=np.float32)
+    max_len = 11
+    strokes5, _ = lib.stroke3_to_stroke5(strokes3, max_len=max_len)
+    self.assertEqual(strokes5.shape[0], max_len)
+    self.assertEqual(
+        strokes5.tolist(), [
+            [0., 0., 1., 0., 0.],
+            [1., 1., 1., 0., 0.],
+            [3., 3., 1., 0., 0.],
+            [6., 6., 0., 1., 0.],
+            [8., 8., 1., 0., 0.],
+            [5., 5., 1., 0., 0.],
+            [4., 4., 1., 0., 0.],
+            [2., 2., 1., 0., 0.],
+            [0., 0., 0., 1., 0.],
+            [0., 0., 0., 0., 1.],
+            [0., 0., 0., 0., 1.],
+        ]
+    )
+    # Note, there is one extra BOS token inserted at the beginning of a
+    # sequence by the conversion from stroke-3 to stroke-5 format.
+    new_strokes3 = lib.stroke5_to_stroke3(strokes5)
+    self.assertEqual(strokes3.tolist(), new_strokes3[1:, :].tolist())
+
   def test_concrete_svg_build_time_stroke_points(self):
     """Tests the point generation build-time API."""
-
     glyph_path = os.path.join(
         absltest.get_default_test_srcdir(),
         _TEST_DATA_DIR,
         "field.svg"
     )
-    _, svg_for_strokes, _, _ = make_text.concat_svgs(
+    svg_tree, _, _ = make_text.concat_svgs(
         [glyph_path], ["field"]
     )
     strokes, glyph_affiliations = svg_to_strokes.svg_tree_to_strokes_for_test(
-        svg_for_strokes, points_per_segment=_POINTS_PER_SEGMENT
+        svg_tree, points_per_segment=_POINTS_PER_SEGMENT
     )
     num_strokes = len(strokes)
     self.assertNotEmpty(strokes)
@@ -100,7 +133,6 @@ class StrokeUtilsTest(absltest.TestCase):
 
   def test_stroke3_from_strokes(self):
     """Tests conversion of regular strokes to stroke-3 format."""
-
     strokes = [
         [(1., 1.), (3., 3.), (6., 6.)],
         [(8., 8.), (5., 5.), (4., 4.), (2., 2.), (0., 0.)],
@@ -147,6 +179,43 @@ class StrokeUtilsTest(absltest.TestCase):
           ]
       )
     self.assertEqual(test_strokes, strokes3)
+
+  def test_points_to_strokes3(self):
+    """Tests (x, y) points to stroke-3 format conversion."""
+
+    # Convert simple strokes to individual point representation. The resulting
+    # x and y point list lengths should be equal to the number of points plus
+    # two extra end of stroke elements.
+    strokes = [
+        [(1., 1.), (3., 3.), (6., 6.)],
+        [(8., 8.), (5., 5.), (4., 4.), (2., 2.), (0., 0.)],
+        [(10.0, 5.0), (20.0, 10.0)],
+    ]
+    num_points = 10
+    stroke_glyph_affiliations = [(0, 0)] * len(strokes)
+    x_strokes, y_strokes, _, _, _ = lib.stroke_points(
+        strokes, stroke_glyph_affiliations
+    )
+    self.assertLen(x_strokes, num_points + 3)
+    self.assertLen(y_strokes, num_points + 3)
+
+    # Convert to stroke-3 format.
+    strokes3 = lib.points_to_strokes3(
+        np.array(x_strokes, dtype=np.float32),
+        np.array(y_strokes, dtype=np.float32)
+    )
+    self.assertEqual(strokes3.tolist(), [
+        [1., 1., 0.],
+        [3., 3., 0.],
+        [6., 6., 1.],
+        [8., 8., 0.],
+        [5., 5., 0.],
+        [4., 4., 0.],
+        [2., 2., 0.],
+        [0., 0., 1.],
+        [10., 5., 0.],
+        [20., 10., 1.],
+    ])
 
 
 if __name__ == "__main__":

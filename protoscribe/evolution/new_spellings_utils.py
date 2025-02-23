@@ -194,7 +194,7 @@ def save_glyph_graphics(
     # For biglyphs, convert individual stroke sequences and concatenate.
     xml_semantic = stroke_utils.stroke3_strokes_to_svg(glyph_strokes[0])
     xml_phonetic = stroke_utils.stroke3_strokes_to_svg(glyph_strokes[1])
-    combined_svg, _, _, _ = make_text.concat_xml_svgs(
+    combined_svg, _, _ = make_text.concat_xml_svgs(
         [
             ET.ElementTree(ET.fromstring(xml_semantic)),
             ET.ElementTree(ET.fromstring(xml_phonetic)),

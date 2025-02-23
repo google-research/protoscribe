@@ -19,6 +19,7 @@ import tempfile
 
 from absl import flags
 from absl.testing import absltest
+from absl.testing import flagsaver
 from protoscribe.glyphs import make_text
 
 import glob
@@ -55,22 +56,33 @@ class MakeTextTest(absltest.TestCase):
         FLAGS.test_srcdir, _TEST_DATA_DIR, "golden.svg"
     )
     cls.golden = _load_svg(cls.golden_path)
-    cls.golden_for_strokes_path = os.path.join(
-        FLAGS.test_srcdir, _TEST_DATA_DIR, "golden_for_strokes.svg"
+    cls.golden_simplified_path = os.path.join(
+        FLAGS.test_srcdir, _TEST_DATA_DIR, "golden_simplified.svg"
     )
-    cls.golden_for_strokes = _load_svg(cls.golden_for_strokes_path)
+    cls.golden_simplified = _load_svg(cls.golden_simplified_path)
 
+  @flagsaver.flagsaver(simplify_svg_trees=False)
   def testSvgMatch(self) -> None:
-    svg, svg_for_strokes, _, _ = make_text.concat_svgs(
-        self.svgs, self.glyphs,
-    )
+    svg, _, _ = make_text.concat_svgs(self.svgs, glyphs=self.glyphs)
     if _GENERATE_GOLDEN.value:
       svg.write(self.golden_path)
-      svg_for_strokes.write(self.golden_for_strokes_path)
     else:
       for glyph, golden_glyph in [
           (svg, self.golden),
-          (svg_for_strokes, self.golden_for_strokes),
+      ]:
+        tmpfile = tempfile.NamedTemporaryFile(suffix=".svg", prefix="/tmp/")
+        glyph.write(tmpfile.name)
+        test = _load_svg(tmpfile.name)
+        self.assertEqual(golden_glyph, test)
+
+  @flagsaver.flagsaver(simplify_svg_trees=True)
+  def testSvgMatchWithSimplification(self) -> None:
+    svg, _, _ = make_text.concat_svgs(self.svgs, glyphs=self.glyphs)
+    if _GENERATE_GOLDEN.value:
+      svg.write(self.golden_simplified_path)
+    else:
+      for glyph, golden_glyph in [
+          (svg, self.golden_simplified),
       ]:
         tmpfile = tempfile.NamedTemporaryFile(suffix=".svg", prefix="/tmp/")
         glyph.write(tmpfile.name)

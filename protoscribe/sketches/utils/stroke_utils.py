@@ -20,6 +20,7 @@ import jax.numpy as jnp
 from matplotlib import pyplot as plt
 import numpy as np
 import PIL.Image
+from protoscribe.glyphs import svg_simplify as svg_simplify_lib
 from protoscribe.sketches.utils import stroke_stats as stroke_stats_lib
 
 import glob
@@ -32,11 +33,6 @@ _MAX_STROKE_POINTS = flags.DEFINE_integer(
     "max_stroke_points", 1_000,
     "Maximum number of stroke points which are used for computing the "
     "statistics for stroke normalization."
-)
-
-STROKE_WIDTH = flags.DEFINE_float(
-    "stroke_width", 5.0,
-    "Stroke width used when generating SVG from individual strokes."
 )
 
 # End of stroke value.
@@ -225,7 +221,7 @@ def stroke3_strokes_to_svg(
       path_buf += f" L{lines[i][0]} {lines[i][1]}"
     path_buf += (
         "\" fill=\"none\" stroke=\"#000000\" stroke-width=\"%f\" />\n" % (
-            STROKE_WIDTH.value
+            svg_simplify_lib.STROKE_WIDTH.value
         )
     )
     buf += path_buf
@@ -326,3 +322,28 @@ def stroke3_from_strokes(
       flat_points.append((cur_x, cur_y, lift_pen))
       prev_x, prev_y = x, y
   return np.array(flat_points, dtype=np.float32)
+
+
+def points_to_strokes3(x_strokes: Array, y_strokes: Array) -> Array:
+  """Generates stroke-3 array from individual point arrays.
+
+  One dimensional arrays of x and y strokes. The lift points are indicated
+  by `END_OF_STROKE`.
+
+  Args:
+    x_strokes: Array of x points for strokes of shape (L,).
+    y_strokes: Array of y points for strokes of shape (L,).
+
+  Returns:
+    Array for strokes in strokes-3 format.
+  """
+  pen_state = x_strokes == END_OF_STROKE
+  pen_state = pen_state.astype(np.float32)
+  pen_state = np.roll(pen_state, -1, axis=0)[:-1]
+  pen_state = np.concatenate([pen_state, [1.]], axis=0)
+  indices = np.reshape(np.where(x_strokes != END_OF_STROKE), (-1,))
+  x_strokes = np.take(x_strokes, indices)
+  y_strokes = np.take(y_strokes, indices)
+  pen_state = np.take(pen_state, indices)
+  strokes_3 = np.stack([x_strokes, y_strokes, pen_state], axis=1)
+  return strokes_3
