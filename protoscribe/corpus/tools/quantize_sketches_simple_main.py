@@ -29,14 +29,14 @@ python protoscribe/corpus/tools/quantize_sketches_simple_main.py \
 
 import itertools
 import logging
-from typing import Any, Iterable, Sequence
+from typing import Sequence
 
 from absl import app
 from absl import flags
 import ml_collections
 import numpy as np
 from protoscribe.corpus.reader import tasks as tasks_lib
-from protoscribe.sketches.utils import stroke_utils as strokes_lib
+from protoscribe.corpus.tools import quantize_sketches_simple
 from sklearn import cluster
 import t5
 
@@ -44,6 +44,8 @@ import glob
 import os
 
 Array = np.ndarray
+
+_RANDOM_SEED = 42
 
 _MAX_STROKE_SEQUENCE_LENGTH = flags.DEFINE_integer(
     "max_stroke_sequence_length", 250,
@@ -64,8 +66,9 @@ _STROKE_NORMALIZATION_TYPE = flags.DEFINE_enum(
 )
 
 _STROKE_RANDOM_SCALE_FACTOR = flags.DEFINE_float(
-    "stroke_random_scale_factor", 0.15,
-    "Random stretch factor for sketch."
+    "stroke_random_scale_factor", 0.,
+    "Random stretch factor for sketch. By default do not stretch the sketch. "
+    "This corresponds to the current values in model configurations."
 )
 
 _SAMPLE_NUM_SKETCHES = flags.DEFINE_integer(
@@ -111,6 +114,13 @@ _KMEANS_MAX_ITER = flags.DEFINE_integer(
     "Maximum number of iterations."
 )
 
+_TOLERANCE = flags.DEFINE_float(
+    "tolerance", 1e-6,
+    "Relative tolerance with regards to Frobenius norm of the difference "
+    "in the cluster centers of two consecutive iterations to declare "
+    "convergence."
+)
+
 _TASK_NAME = "quantizer"
 
 
@@ -121,68 +131,6 @@ def _get_config() -> ml_collections.ConfigDict:
   config.stroke_normalization_type = _STROKE_NORMALIZATION_TYPE.value
   config.stroke_random_scale_factor = _STROKE_RANDOM_SCALE_FACTOR.value
   return config
-
-
-def _collect_points(examples: Iterable[dict[str, Any]]) -> Array:
-  """Collects the points where the pen touches and lifts from the paper.
-
-  Args:
-    examples: Documents read from the corpus. Each document is a dictionary
-      of features.
-
-  Returns:
-    Array of touch and lift points.
-
-  Raises:
-    ValueError if documents are invalid.
-  """
-
-  # Collect lists of tuples representing all touch and lift points.
-  logging.info("Collecting all touch and lift points ...")
-  touch_points, lift_points = [], []
-  for i, features in enumerate(examples):
-    if "strokes" not in features:
-      raise ValueError(f"[{i}] Bad dataset: strokes expected!")
-    sketch = features["strokes"]
-    # Stroke-3: The third element indicates whether the pen is lifted away
-    # from the paper.
-    sketch = strokes_lib.stroke5_to_stroke3(sketch)
-    # Offset to next touch point.
-    pen_lift_ids = np.where(sketch[:, 2] == 1)[0] + 1
-    pen_lift_ids = pen_lift_ids[:-1]  # Exclude EOS.
-    # Pen touching the paper.
-    pen_touch_ids = set(range(len(sketch))) - set(pen_lift_ids)
-
-    touch_points.append(sketch[list(pen_touch_ids), :2])
-    lift_points.append(sketch[list(pen_lift_ids), :2])
-
-  touch_points = np.concatenate(touch_points).astype(dtype=np.float32)
-  lift_points = np.concatenate(lift_points).astype(dtype=np.float32)
-  num_touch = touch_points.shape[0]
-  num_lift = lift_points.shape[0]
-  logging.info(
-      "Lift points: %d, touch points: %d, lift/touch data ratio: %f",
-      num_lift, num_touch, num_lift / num_touch
-  )
-
-  # Sample the points given the required lift-to-touch ration.
-  logging.info("Sampling points ...")
-  if _LIFT_TO_TOUCH_RATIO.value > 0.:
-    num_sample_lift = int(
-        _LIFT_TO_TOUCH_RATIO.value * _SAMPLE_NUM_POINTS.value
-    )
-    num_sample_touch = _SAMPLE_NUM_POINTS.value - num_sample_lift
-    if num_sample_lift < num_lift:
-      logging.info("Sampling %d lift points ...", num_sample_lift)
-      lift_ids = np.random.choice(num_lift, num_sample_lift, replace=False)
-      lift_points = lift_points[lift_ids]
-    if num_sample_touch < num_touch:
-      logging.info("Sampling %d touch points ...", num_sample_touch)
-      touch_ids = np.random.choice(num_touch, num_sample_touch, replace=False)
-      touch_points = touch_points[touch_ids]
-
-  # Translates slice objects to concatenation along the first axis.
-  return np.r_[touch_points, lift_points].astype(dtype=np.float32)
 
 
 def main(argv: Sequence[str]) -> None:
@@ -204,7 +152,12 @@ def main(argv: Sequence[str]) -> None:
   examples = itertools.islice(
       ds.as_numpy_iterator(), _SAMPLE_NUM_SKETCHES.value
   )
-  points = _collect_points(examples)
+  points = quantize_sketches_simple.collect_points(
+      examples,
+      random_seed=_RANDOM_SEED,
+      total_num_points=_SAMPLE_NUM_POINTS.value,
+      lift_to_touch_ratio=_LIFT_TO_TOUCH_RATIO.value
+  )
 
   logging.info(
       "Collected %d points. Clustering with %s K-Means ...",
@@ -215,7 +168,7 @@ def main(argv: Sequence[str]) -> None:
         n_clusters=_VOCAB_SIZE.value,
         max_iter=_KMEANS_MAX_ITER.value,
         algorithm="auto",
-        tol=1e-6,
+        tol=_TOLERANCE.value,
         verbose=0
     ).fit(points)
   else:
@@ -225,7 +178,7 @@ def main(argv: Sequence[str]) -> None:
         max_iter=_KMEANS_MAX_ITER.value,
         max_no_improvement=5_000,
         batch_size=4096,
-        tol=0.0,
+        tol=_TOLERANCE.value,
         verbose=1
     ).fit(points)
   logging.info(
@@ -235,7 +188,7 @@ def main(argv: Sequence[str]) -> None:
 
   logging.info("Saving clusters to %s ...", _OUTPUT_NPY_FILE.value)
   with open(_OUTPUT_NPY_FILE.value, mode="wb") as f:
-    np.save(f, result.cluster_centers_)
+    np.save(f, result.cluster_centers_.astype(dtype=np.float64))
 
 
 if __name__ == "__main__":
