@@ -129,4 +129,30 @@ def simplify_svg_tree(tree: ET.ElementTree) -> tuple[ET.ElementTree, int, int]:
         f"of new paths {len(new_paths)}"
     )
 
+  ET.indent(simplified_xml_tree)
   return simplified_xml_tree, len(flat_paths), num_segments(flat_paths)
+
+
+def simplify_svg_str(svg: str) -> tuple[str, int, int]:
+  """Simplifies the structure of SVG XML expressed as string.
+
+  Will flatten all the paths by removing the transforms and convert all the
+  non-path elements to path objects.
+
+  Args:
+    svg: String representation of an SVG XML.
+
+  Returns:
+    A tuple consisting of:
+      - A simplified SVG XML as a string.
+      - Number of paths in an SVG.
+      - Total number of segments.
+  """
+  simplified_tree, num_paths, num_path_segments = simplify_svg_tree(
+      ET.ElementTree(ET.fromstring(svg))
+  )
+  simplified_svg = (
+      """<?xml version="1.0" encoding="utf-8"?>\n""" +
+      ET.tostring(simplified_tree.getroot()).decode("utf8")
+  )
+  return simplified_svg, num_paths, num_path_segments

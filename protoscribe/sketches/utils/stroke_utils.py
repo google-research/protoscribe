@@ -226,7 +226,11 @@ def stroke3_strokes_to_svg(
     )
     buf += path_buf
   buf += "</g></svg>\n"
-  return buf
+
+  # Return simplified representation where all the elements are the paths and
+  # the paths are flattened (no transforms).
+  xml_str, _, _ = svg_simplify_lib.simplify_svg_str(buf)
+  return xml_str
 
 
 def stroke3_strokes_to_svg_file(
