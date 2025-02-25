@@ -69,12 +69,19 @@ def _points_to_strokes3(
   indices = tf.reshape(tf.where(x_strokes != _END_OF_STROKE), (-1,))
   x_strokes = tf.gather(x_strokes, indices)
   y_strokes = tf.gather(y_strokes, indices)
-  x_strokes, y_strokes = stroke_stats_lib.normalize_strokes(
-      config, stroke_stats, x_strokes, y_strokes)
   if is_training:
+    # Random scaling is performed *before* the normalization. The interaction
+    # between the two is non-trivial because we don't perform random scaling at
+    # dataset building time. This means that random scaling is not taked into
+    # account when computing global stroke statistics. Setting the scaling
+    # factor value too high is likely to result in corrupt sketches. An
+    # empirical upper bound for the scaling value \alpha is $\alpha < 0.15$.
     x_strokes, y_strokes = _random_scale_strokes(
         stroke_random_scale_factor, x_strokes, y_strokes
     )
+  x_strokes, y_strokes = stroke_stats_lib.normalize_strokes(
+      config, stroke_stats, x_strokes, y_strokes
+  )
   pen_state = tf.gather(pen_state, indices)
   strokes_3 = tf.stack([x_strokes, y_strokes, pen_state], axis=1)
   return strokes_3
@@ -92,7 +99,8 @@ def _strokes3_to_strokes5(
   pen_lifted = strokes_3[:, 2]  # $p_2$.
   pen_eos = tf.zeros_like(pen_touching)  # $p_3$.
   strokes_5 = tf.stack(
-      [delta_x, delta_y, pen_touching, pen_lifted, pen_eos], axis=1)
+      [delta_x, delta_y, pen_touching, pen_lifted, pen_eos], axis=1
+  )
   strokes_5 = strokes_5[:max_stroke_sequence_length - 2, :]
 
   # For autoregressive mode either include BOS (for inputs) or EOS (for
@@ -101,7 +109,8 @@ def _strokes3_to_strokes5(
   strokes_5 = tf.concat([
       tf.constant([[0., 0., 1, 0, 0]], dtype=tf.float32),
       strokes_5,
-      tf.constant([[0., 0., 0, 0, 1]], dtype=tf.float32)], axis=0)
+      tf.constant([[0., 0., 0, 0, 1]], dtype=tf.float32)
+  ], axis=0)
   if config.manual_padding:
     strokes_5 = _pad_strokes(strokes_5, max_stroke_sequence_length)
   return strokes_5, real_length

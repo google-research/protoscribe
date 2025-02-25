@@ -102,7 +102,7 @@ _TF_STROKE_TOKENIZER = flags.DEFINE_bool(
 )
 
 _STROKE_RANDOM_SCALE_FACTOR = flags.DEFINE_float(
-    "stroke_random_scale_factor", 0.15,
+    "stroke_random_scale_factor", 0.,
     "Random stretch factor for sketch."
 )
 
@@ -119,24 +119,39 @@ def _polylines_summary(polylines: list[Array]) -> str:
   return "-".join([str(len(strokes)) for strokes in polylines])
 
 
-def _save_sketch(sketch5: Array, sketch_id: int, sketch_name: str) -> None:
-  """Saves sketch with stroke-5 structure in various formats."""
-  sketch3 = strokes_lib.stroke5_to_stroke3(sketch5)
+def _save_sketch(
+    sketch_3_or_5: Array,
+    sketch_id: int,
+    sketch_name: str
+) -> None:
+  """Saves sketch with stroke-5 structure in various formats.
+
+  Args:
+    sketch_3_or_5: Array of shape (L, 3) or (L, 5) in either of sketch-3 or
+      sketch-5 formats.
+    sketch_id: Integer identifying the sketch.
+    sketch_name: Name of the sketch.
+  """
+  sketch3 = (
+      strokes_lib.stroke5_to_stroke3(sketch_3_or_5)
+      if sketch_3_or_5.shape[1] == 5 else sketch_3_or_5
+  )
   polylines = strokes_lib.stroke3_deltas_to_polylines(sketch3)
 
   # Save regular raster image.
   image = strokes_lib.polylines_to_raster_image(polylines)
   output_file = os.path.join(_OUTPUT_DIR.value, f"{sketch_name}.png")
   logging.info(
-      "[%d] Saving %s (%d polylines, strokes: %s) ...",
-      sketch_id, output_file, len(polylines), _polylines_summary(polylines)
+      "[%d] [%s] Saving %s (%d polylines, strokes: %s) ...",
+      sketch_id, sketch_name, output_file,
+      len(polylines), _polylines_summary(polylines)
   )
   image.save(output_file)
 
   # Save SVG.
   if _SAVE_SVG.value:
     output_file = os.path.join(_OUTPUT_DIR.value, f"{sketch_name}.svg")
-    logging.info("[%d] Saving %s ...", sketch_id, output_file)
+    logging.info("[%d] [%s] Saving %s ...", sketch_id, sketch_name, output_file)
     strokes_lib.stroke3_strokes_to_svg_file(sketch3, output_file)
 
 
@@ -205,38 +220,42 @@ def main(argv: Sequence[str]) -> None:
       raise ValueError(f"[{i}] Bad dataset: text expected!")
     text = features["text.text"].decode("utf-8")
     text = text.replace(" ", "_")
-    if "strokes" not in features:
-      raise ValueError(f"[{i}] Bad dataset: strokes expected!")
-    sketch5 = features["strokes"]
     if "sketch.glyph_affiliations.ids" not in features:
       raise ValueError(f"[{i}] Bad dataset: No glyph affiliations!")
     glyph_affiliations = features["sketch.glyph_affiliations.ids"]
 
-    normalized_sketch5 = sketch5
+    # Read the strokes (stroke-5 format). This are normalized by the corpus
+    # reader.
+    if "strokes" not in features:
+      raise ValueError(f"[{i}] Bad dataset: strokes expected!")
+    normalized_sketch5 = features["strokes"]
+    sketch5_for_display = normalized_sketch5
     if norm_lib.should_normalize_strokes(config):
-      sketch5 = norm_lib.denormalize_strokes_array(
-          config, sketch_stroke_stats, sketch5
+      sketch5_for_display = norm_lib.denormalize_strokes_array(
+          config, sketch_stroke_stats, normalized_sketch5
       )
-    _save_sketch(sketch5, i, text)
+    _save_sketch(
+        sketch_3_or_5=sketch5_for_display, sketch_id=i, sketch_name=text
+    )
 
+    # If tokenizer is configured, test tokenization/detokenization process.
     if tokenizer:
-      sketch3 = _tokenize_and_reconstruct(
+      normalized_sketch3 = _tokenize_and_reconstruct(
           normalized_sketch5, glyph_affiliations, tokenizer
       )
+      sketch3_for_display = normalized_sketch3
       if norm_lib.should_normalize_strokes(config):
-        sketch3 = norm_lib.denormalize_strokes_array(
-            config, sketch_stroke_stats, sketch3
+        sketch3_for_display = norm_lib.denormalize_strokes_array(
+            config, sketch_stroke_stats, normalized_sketch3
         )
-      polylines = strokes_lib.stroke3_deltas_to_polylines(sketch3)
-      image = strokes_lib.polylines_to_raster_image(polylines)
+
       vocab_size = tokenizer.codebook.shape[0]
-      file_name = f"{text}_tok{vocab_size}.png"
-      output_file = os.path.join(_OUTPUT_DIR.value, file_name)
-      logging.info(
-          "[%d] Saving %s (%d polylines, strokes: %s) ...",
-          i, output_file, len(polylines), _polylines_summary(polylines)
+      sketch_name = f"{text}_tok{vocab_size}"
+      _save_sketch(
+          sketch_3_or_5=sketch3_for_display,
+          sketch_id=i,
+          sketch_name=sketch_name
       )
-      image.save(output_file)
 
 
 if __name__ == "__main__":
