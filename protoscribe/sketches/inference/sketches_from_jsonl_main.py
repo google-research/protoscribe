@@ -101,10 +101,10 @@ def main(argv: list[str]) -> None:
     raise app.UsageError("Too many command-line arguments.")
 
   logging.info("Initializing tokenizer ...")
-  config = ml_collections.ConfigDict({
+  config = ml_collections.FrozenConfigDict({
       "max_stroke_sequence_length": _MAX_STROKE_SEQUENCE_LENGTH.value,
       "stroke_normalization_type": _STROKE_NORMALIZATION_TYPE.value,
-      "stroke_tokenizer": ml_collections.ConfigDict({
+      "stroke_tokenizer": ml_collections.FrozenConfigDict({
           "vocab_filename": _TOKENIZER_FILE_NAME.value,
       })
   })

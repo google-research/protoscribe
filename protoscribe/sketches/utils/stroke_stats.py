@@ -144,7 +144,7 @@ class StrokeStats:
       json.dump(self.finalize(), f)
 
 
-def should_normalize_strokes(config: ml_collections.ConfigDict) -> bool:
+def should_normalize_strokes(config: ml_collections.FrozenConfigDict) -> bool:
   """Returns true if stroke normalization should be applied."""
   norm_type = config.get("stroke_normalization_type")
   if not norm_type:
@@ -158,8 +158,9 @@ def should_normalize_strokes(config: ml_collections.ConfigDict) -> bool:
   raise ValueError(f"Unsupported stroke normalization type: {norm_type}")
 
 
-def load_stroke_stats(config: ml_collections.ConfigDict,
-                      stats_file: str) -> FinalStrokeStats:
+def load_stroke_stats(
+    config: ml_collections.FrozenConfigDict, stats_file: str
+) -> FinalStrokeStats:
   """Loads stroke stats from a JSON file."""
   if should_normalize_strokes(config):
     logging.info("Loading stroke statistics for data scaling from %s ...",
@@ -182,9 +183,12 @@ def load_stroke_stats(config: ml_collections.ConfigDict,
   return stats
 
 
-def normalize_strokes(config: ml_collections.ConfigDict,
-                      stats: FinalStrokeStats,
-                      x: Tensor, y: Tensor) -> tuple[Tensor, Tensor]:
+def normalize_strokes(
+    config: ml_collections.FrozenConfigDict,
+    stats: FinalStrokeStats,
+    x: Tensor,
+    y: Tensor
+) -> tuple[Tensor, Tensor]:
   """Applies various types of scaling/normalization."""
   norm_type = config.get("stroke_normalization_type")
   if norm_type == "z-standardize":
@@ -208,7 +212,7 @@ def normalize_strokes(config: ml_collections.ConfigDict,
 
 
 def denormalize_strokes(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     stats: FinalStrokeStats,
     x: Tensor, y: Tensor
 ) -> tuple[Tensor, Tensor]:
@@ -233,7 +237,7 @@ def denormalize_strokes(
 
 
 def denormalize_strokes_array(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     stats: FinalStrokeStats,
     strokes: Tensor,
 ) -> np.ndarray:

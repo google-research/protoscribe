@@ -57,23 +57,24 @@ class GlyphEmbeddingsTest(parameterized.TestCase):
     self.glyph_vocab = glyph_lib.load_glyph_vocab(glyph_vocab_file)
 
   def _load_real_embeddings(self) -> jnp.ndarray:
-    config = ml_collections.ConfigDict()
-    config.concept_embedding_type = "bnc"
-    config.main_lexicon = os.path.join(
-        FLAGS.test_srcdir,
-        "protoscribe/sketches/utils",
-        "testdata/lexicon.tsv",
-    )
-    config.number_lexicon = os.path.join(
-        FLAGS.test_srcdir,
-        "protoscribe/sketches/utils",
-        "testdata/number_lexicon.tsv",
-    )
-    config.phonetic_embeddings = os.path.join(
-        FLAGS.test_srcdir,
-        "protoscribe/sketches/utils",
-        "testdata/phonetic_embeddings.tsv",
-    )
+    config = ml_collections.FrozenConfigDict({
+        "concept_embedding_type": "bnc",
+        "main_lexicon": os.path.join(
+            FLAGS.test_srcdir,
+            "protoscribe/sketches/utils",
+            "testdata/lexicon.tsv",
+        ),
+        "number_lexicon": os.path.join(
+            FLAGS.test_srcdir,
+            "protoscribe/sketches/utils",
+            "testdata/number_lexicon.tsv",
+        ),
+        "phonetic_embeddings": os.path.join(
+            FLAGS.test_srcdir,
+            "protoscribe/sketches/utils",
+            "testdata/phonetic_embeddings.tsv",
+        ),
+    })
     return lib.glyphs_to_embeddings(config, self.glyph_vocab)
 
   def _best_k(self, probs: jnp.ndarray, k: int = 3) -> list[str]:

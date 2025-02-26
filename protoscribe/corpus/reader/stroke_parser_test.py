@@ -41,10 +41,11 @@ class ProtoscribeDatasetTest(tf.test.TestCase):
     super(tf.test.TestCase, self).setUp()
 
     # Setup parser-specific configuration.
-    self.config = ml_collections.ConfigDict()
-    self.config.max_stroke_sequence_length = _MAX_STROKE_SEQUENCE_LENGTH
-    self.config.stroke_random_scale_factor = 0.
-    self.config.manual_padding = True  # Pad sequences.
+    self.config = ml_collections.FrozenConfigDict({
+        "max_stroke_sequence_length": _MAX_STROKE_SEQUENCE_LENGTH,
+        "stroke_random_scale_factor": 0.,
+        "manual_padding": True,  # Pad sequences.
+    })
 
     # Load stroke statistics.
     stats_file = os.path.join(

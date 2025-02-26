@@ -46,7 +46,7 @@ def _l2_normalize(
 
 
 def glyphs_to_embeddings(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     glyph_vocab: glyph_lib.GlyphVocab,
 ) -> JTensor:
   """Computes semantic and phonetic embeddings [V, embedding_length] tensors.

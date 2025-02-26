@@ -124,12 +124,13 @@ _TOLERANCE = flags.DEFINE_float(
 _TASK_NAME = "quantizer"
 
 
-def _get_config() -> ml_collections.ConfigDict:
+def _get_config() -> ml_collections.FrozenConfigDict:
   """Loads the configuration for the model."""
-  config = ml_collections.ConfigDict()
-  config.max_stroke_sequence_length = _MAX_STROKE_SEQUENCE_LENGTH.value
-  config.stroke_normalization_type = _STROKE_NORMALIZATION_TYPE.value
-  config.stroke_random_scale_factor = _STROKE_RANDOM_SCALE_FACTOR.value
+  config = ml_collections.FrozenConfigDict({
+      "max_stroke_sequence_length": _MAX_STROKE_SEQUENCE_LENGTH.value,
+      "stroke_normalization_type": _STROKE_NORMALIZATION_TYPE.value,
+      "stroke_random_scale_factor": _STROKE_RANDOM_SCALE_FACTOR.value,
+  })
   return config
 
 

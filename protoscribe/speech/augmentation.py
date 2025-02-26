@@ -19,9 +19,9 @@ from protoscribe.speech import augmentation_lingvo as impl_lib
 import tensorflow as tf
 
 
-def _default_spec_augment_config() -> ml_collections.ConfigDict:
+def _default_spec_augment_config() -> ml_collections.FrozenConfigDict:
   """Returns default configuration."""
-  return ml_collections.ConfigDict({
+  return ml_collections.FrozenConfigDict({
       "freq_mask_max_bins": 15,
       "freq_mask_count": 1,
       "time_mask_max_frames": 10,
@@ -34,7 +34,7 @@ def _default_spec_augment_config() -> ml_collections.ConfigDict:
 
 def tf_spec_augment(
     spectrum: tf.Tensor,
-    config: ml_collections.ConfigDict | None = None,
+    config: ml_collections.FrozenConfigDict | None = None,
 ) -> tf.Tensor:
   """Performs spectrum augmentation on the inputs.
 

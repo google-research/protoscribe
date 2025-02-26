@@ -104,7 +104,7 @@ _SAVE_SVG = flags.DEFINE_bool(
 
 
 def json_to_sketch(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     sketch_dict: dict[str, Any],
     stroke_stats: stats_lib.FinalStrokeStats,
     stroke_tokenizer: tokenizer_lib.StrokeTokenizer,
@@ -280,7 +280,7 @@ def _title_from_inputs(scorer_dict: Any) -> tuple[str, str]:
 
 
 def _strokes_from_json(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     sketch_dict: dict[str, Any],
     input_text: str,
     stroke_stats: stats_lib.FinalStrokeStats,

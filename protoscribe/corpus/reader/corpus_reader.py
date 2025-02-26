@@ -60,7 +60,7 @@ def _build_text(number: tf.Tensor, concept_or_text: tf.Tensor,
 
 
 def _maybe_noisify(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     embedding_type: str,
     embeddings: tf.Tensor,
     is_training: bool,
@@ -125,7 +125,7 @@ def _preprocess_features(features: Features) -> Features:
 
 def _parse_discrete_glyphs(
     features: dict[str, tf.Tensor],
-    config: ml_collections.ConfigDict
+    config: ml_collections.FrozenConfigDict
 ) -> tuple[tf.Tensor, tf.Tensor]:
   """Parses discrete glyph sequences and their types."""
   glyph_tokens = features["text/glyph/tokens"]
@@ -140,7 +140,7 @@ def _parse_discrete_glyphs(
 
 def _parse_concept_embeddings(
     features: dict[str, tf.Tensor],
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     is_training: bool,
 ) -> tuple[tf.Tensor, tf.Tensor, dict[str, tf.Tensor]]:
   """Parses concept semantic embeddings into combined and individual tensors."""
@@ -180,7 +180,7 @@ def _parse_concept_embeddings(
 def _parse_phonetic_embeddings(
     features: dict[str, tf.Tensor],
     feature_name: str,
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     is_training: bool
 ) -> tuple[tf.Tensor, tf.Tensor]:
   """Parses and pads 2D phonetic embeddings."""
@@ -209,7 +209,7 @@ def _parse_phonetic_embeddings(
 
 
 def _parse_vision_feature(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     features: dict[str, tf.Tensor],
     feature_name: str,
     is_training: bool
@@ -256,7 +256,7 @@ def _parse_vision_feature(
 
 
 def _speech_log_mel_spectrum(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     features: dict[str, tf.Tensor],
     is_training: bool
 ) -> dict[str, tf.Tensor]:
@@ -337,7 +337,7 @@ def _speech_log_mel_spectrum(
 
 
 def _speech_tokens_or_embeddings_features(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     features: dict[str, tf.Tensor],
     speech_tokenizer: AudioTokenizer,
     is_training: bool
@@ -360,7 +360,7 @@ def _speech_tokens_or_embeddings_features(
 
 
 def feature_specification(
-    config: ml_collections.ConfigDict
+    config: ml_collections.FrozenConfigDict
 ) -> dict[str, tf.io.FixedLenFeature | tf.io.VarLenFeature]:
   """Builds feature specification for parsing from TF examples."""
   features = {
@@ -405,7 +405,7 @@ def feature_specification(
 
 def parse_features(
     features: Features,
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     sketch_stroke_stats: StrokeStats,
     stroke_tokenizer: StrokeTokenizer | None,
     speech_tokenizer: AudioTokenizer | None,
@@ -505,7 +505,7 @@ def parse_features(
 
 def parse_example(
     example: Any,
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     sketch_stroke_stats: StrokeStats,
     stroke_tokenizer: StrokeTokenizer | None,
     speech_tokenizer: AudioTokenizer | None,

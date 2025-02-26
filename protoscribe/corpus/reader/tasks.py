@@ -47,7 +47,7 @@ gin.constant("tasks.EMBEDDING_SPEECH", EmbeddingType.SPEECH)
 
 
 def _target_features(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
 ) -> seqio.Feature:
   """Returns target features depending on configuration."""
 
@@ -82,7 +82,7 @@ def _target_features(
 
 
 def _output_features_for_synthesis(
-    config: ml_collections.ConfigDict
+    config: ml_collections.FrozenConfigDict
 ) -> dict[str, seqio.Feature]:
   """Adds generation-specific features (embeddings -> sketch tokens).
 
@@ -158,7 +158,7 @@ def _output_features_for_synthesis(
 
 
 def _output_features_for_recognition(
-    config: ml_collections.ConfigDict
+    config: ml_collections.FrozenConfigDict
 ) -> dict[str, seqio.Feature]:
   """Adds recognition-specific features (sketch tokens -> glyph IDs).
 
@@ -196,7 +196,7 @@ def _output_features_for_recognition(
 
 
 def _output_features(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
 ) -> dict[str, seqio.Feature]:
   """Returns dictionary of feautures available to the model."""
 
@@ -231,7 +231,7 @@ def _get_reader_cls(dataset_format: str) -> Callable[..., tf.data.Dataset]:
 
 
 def _inputs_and_targets_for_synthesis(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     example: dict[str, tf.Tensor],
 ) -> dict[str, tf.Tensor]:
   """Inputs/outputs for sketch generation."""
@@ -259,7 +259,7 @@ def _inputs_and_targets_for_synthesis(
 
 
 def _inputs_and_targets_for_recognition(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     example: dict[str, tf.Tensor],
 ) -> dict[str, tf.Tensor]:
   """Inputs/outputs for sketch generation."""
@@ -274,7 +274,7 @@ def _inputs_and_targets_for_recognition(
 
 def _preprocess_tf_example(
     features: parser_lib.Features,
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     sketch_stroke_stats: ds_lib.StrokeStats,
     stroke_tokenizer: tokenizer_lib.StrokeTokenizer | None,
     speech_tokenizer: audio_tokenizer.AudioTokenizer | None,
@@ -321,7 +321,7 @@ def _preprocess_tf_example(
 
 def _dataset_preprocessor(
     dataset: tf.data.Dataset,
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     sketch_stroke_stats: ds_lib.StrokeStats,
     stroke_tokenizer: ds_lib.StrokeTokenizer | None,
     speech_tokenizer: audio_tokenizer.AudioTokenizer | None,
@@ -404,7 +404,7 @@ def register(
 ) -> str:
   """Registers task from gin scaffolding."""
 
-  config = ml_collections.ConfigDict({
+  config = {
       "concept_embedding_type": concept_embedding_type,
       "glyph_only_targets": glyph_only_targets,
       "glyph_recognition": glyph_recognition,
@@ -419,6 +419,7 @@ def register(
       "stroke_normalization_type": stroke_normalization_type,
       "stroke_random_scale_factor": stroke_random_scale_factor,
       "stroke_combine_with_glyphs": stroke_combine_with_glyphs,
+      "stroke_token_vocab_filename": stroke_token_vocab_filename,
       "vision_combine_type": vision_combine_type,
       "speech_corpus_sample_rate": speech_corpus_sample_rate,
       "speech_frame_length_ms": speech_frame_length_ms,
@@ -432,11 +433,14 @@ def register(
       "speech_normalize_waveform": speech_normalize_waveform,
       "speech_keep_waveform": speech_keep_waveform,
       "speech_tokenizer_name_or_path": speech_tokenizer_name_or_path,
-  })
+  }
   if stroke_token_vocab_filename:
-    config.stroke_tokenizer = ml_collections.ConfigDict({
-        "vocab_filename": stroke_token_vocab_filename,
+    config.update({
+        "stroke_tokenizer": {
+            "vocab_filename": stroke_token_vocab_filename,
+        },
     })
+  config = ml_collections.FrozenConfigDict(config)
   logging.info("[%s] Task configuration: %s", task_name, config)
 
   if not dataset_dir:

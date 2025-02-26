@@ -120,7 +120,7 @@ def sketch_stroke_stats_file() -> str:
 
 
 def get_stroke_tokenizer(
-    config: ml_collections.ConfigDict
+    config: ml_collections.FrozenConfigDict
 ) -> StrokeTokenizer | None:
   """Helper method for constructing a tokenizer from configuration."""
   stroke_tokenizer = None
@@ -132,7 +132,9 @@ def get_stroke_tokenizer(
   return stroke_tokenizer
 
 
-def get_sketch_stroke_stats(config: ml_collections.ConfigDict) -> StrokeStats:
+def get_sketch_stroke_stats(
+    config: ml_collections.FrozenConfigDict
+) -> StrokeStats:
   """Helper method for constructing sketch stroke statistics."""
   return stroke_stats_lib.load_stroke_stats(config, sketch_stroke_stats_file())
 

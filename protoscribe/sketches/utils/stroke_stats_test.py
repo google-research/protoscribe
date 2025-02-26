@@ -40,9 +40,11 @@ class StrokeStatsTest(parameterized.TestCase):
         FLAGS.test_srcdir,
         "protoscribe/sketches/utils",
         "testdata/stroke_stats.json")
-    config = ml_collections.ConfigDict()
+    config = ml_collections.FrozenConfigDict()
     self.assertFalse(lib.should_normalize_strokes(config))
-    config.stroke_normalization_type = norm_type
+    config = ml_collections.FrozenConfigDict({
+        "stroke_normalization_type": norm_type,
+    })
     if norm_type == "none":
       self.assertFalse(lib.should_normalize_strokes(config))
     else:

@@ -50,10 +50,10 @@ class SketchesFromJsonlTest(absltest.TestCase):
     FLAGS.dataset_dir = os.path.join(FLAGS.test_srcdir, _DATASET_DIR)
     FLAGS.skip_plots = True
 
-    self.config = ml_collections.ConfigDict({
+    self.config = ml_collections.FrozenConfigDict({
         "max_stroke_sequence_length": _MAX_STROKE_SEQUENCE_LENGTH,
         "stroke_normalization_type": _STROKE_NORMALIZATION_TYPE,
-        "stroke_tokenizer": ml_collections.ConfigDict({
+        "stroke_tokenizer": ml_collections.FrozenConfigDict({
             "vocab_filename": _TOKENIZER_FILE_NAME,
         })
     })

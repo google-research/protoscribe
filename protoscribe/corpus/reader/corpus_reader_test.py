@@ -48,22 +48,23 @@ class CorpusReaderTest(tf.test.TestCase, parameterized.TestCase):
     logging.info("Checking corpus split `%s` ...", split_name)
 
     # Create default dummy configuration.
-    config = ml_collections.ConfigDict()
-    config.concept_embedding_type = "bnc"
-    config.manual_padding = True  # Pad sequences.
-    config.max_stroke_sequence_length = _MAX_STROKE_SEQUENCE_LENGTH
-    config.max_glyph_sequence_length = _MAX_GLYPH_SEQUENCE_LENGTH
-    config.max_phonetic_sequence_length = _MAX_PHONETIC_SEQUENCE_LENGTH
-    config.max_speech_frame_sequence_length = _MAX_SPEECH_FRAME_SEQUENCE_LENGTH
-    config.stroke_random_scale_factor = 0.
-    config.stroke_combine_with_glyphs = False
-    config.speech_framework_type = "dmvr"
-    config.speech_corpus_sample_rate = 16_000
-    config.speech_frame_length_ms = 25.
-    config.speech_frame_step_ms = 10.
-    config.speech_num_mel_channels = 128
-    config.speech_normalize_waveform = False
-    config.speech_keep_waveform = False
+    config = ml_collections.FrozenConfigDict({
+        "concept_embedding_type": "bnc",
+        "manual_padding": True,  # Pad sequences.
+        "max_stroke_sequence_length": _MAX_STROKE_SEQUENCE_LENGTH,
+        "max_glyph_sequence_length": _MAX_GLYPH_SEQUENCE_LENGTH,
+        "max_phonetic_sequence_length": _MAX_PHONETIC_SEQUENCE_LENGTH,
+        "max_speech_frame_sequence_length": _MAX_SPEECH_FRAME_SEQUENCE_LENGTH,
+        "stroke_random_scale_factor": 0.,
+        "stroke_combine_with_glyphs": False,
+        "speech_framework_type": "dmvr",
+        "speech_corpus_sample_rate": 16_000,
+        "speech_frame_length_ms": 25.,
+        "speech_frame_step_ms": 10.,
+        "speech_num_mel_channels": 128,
+        "speech_normalize_waveform": False,
+        "speech_keep_waveform": False,
+    })
 
     # Read and parse the example documents.
     path = os.path.join(

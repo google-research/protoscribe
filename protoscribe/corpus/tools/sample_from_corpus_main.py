@@ -193,11 +193,11 @@ def main(argv: Sequence[str]) -> None:
   if len(argv) > 1:
     raise app.UsageError("Too many command-line arguments.")
 
-  config = ml_collections.ConfigDict()
-  config.max_stroke_sequence_length = _MAX_STROKE_SEQUENCE_LENGTH.value
-  config.stroke_normalization_type = _STROKE_NORMALIZATION_TYPE.value
-  config.stroke_random_scale_factor = _STROKE_RANDOM_SCALE_FACTOR.value
-
+  config = ml_collections.FrozenConfigDict({
+      "max_stroke_sequence_length": _MAX_STROKE_SEQUENCE_LENGTH.value,
+      "stroke_normalization_type": _STROKE_NORMALIZATION_TYPE.value,
+      "stroke_random_scale_factor": _STROKE_RANDOM_SCALE_FACTOR.value,
+  })
   sketch_stroke_stats = ds_lib.get_sketch_stroke_stats(config)
   task_name = tasks_lib.register(
       task_name=_TASK_NAME,

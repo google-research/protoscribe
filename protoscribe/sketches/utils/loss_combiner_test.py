@@ -59,10 +59,12 @@ class LossCombinerTest(absltest.TestCase):
     self.assertIn("loss_weights", state["params"])
 
   def test_factory(self):
-    config = ml_collections.ConfigDict()
+    config = ml_collections.FrozenConfigDict()
     combiner = lib.get_loss_combiner(config, num_losses=3)
     self.assertIsNone(combiner)
-    config.loss_combiner_type = "None"
+    config = ml_collections.FrozenConfigDict({
+        "loss_combiner_type": "None",
+    })
     combiner = lib.get_loss_combiner(config, num_losses=3)
     self.assertIsNone(combiner)
 

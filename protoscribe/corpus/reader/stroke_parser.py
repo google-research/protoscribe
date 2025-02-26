@@ -55,7 +55,7 @@ def _pad_strokes(
 
 
 def _points_to_strokes3(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     stroke_stats: StrokeStats,
     x_strokes: tf.Tensor,
     y_strokes: tf.Tensor,
@@ -88,7 +88,7 @@ def _points_to_strokes3(
 
 
 def _strokes3_to_strokes5(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     strokes_3: tf.Tensor,
     max_stroke_sequence_length: int
 ):
@@ -117,7 +117,7 @@ def _strokes3_to_strokes5(
 
 
 def parse_sketch_strokes_or_tokens(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     features: dict[str, tf.Tensor],
     stroke_stats: StrokeStats,
     stroke_tokenizer: Optional[tokenizer_lib.StrokeTokenizer],
@@ -190,7 +190,7 @@ def parse_sketch_strokes_or_tokens(
 
 
 def parse_formant_strokes(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     features: dict[str, tf.Tensor],
     feature_type: str,
     stroke_stats: StrokeStats,

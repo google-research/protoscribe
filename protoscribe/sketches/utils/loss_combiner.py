@@ -42,8 +42,9 @@ class HUWSigmaSquareLossCombiner(nn.Module):
     )
 
   @nn.compact
-  def __call__(self, losses: List[JTensor]) -> Tuple[
-      JTensor, JTensor, List[JTensor]]:
+  def __call__(
+      self, losses: List[JTensor]
+  ) -> Tuple[JTensor, JTensor, List[JTensor]]:
     """Computes combination of individual losses.
 
     Args:
@@ -168,7 +169,7 @@ class HUWLiebelKoernerLossCombiner(nn.Module):
 
 
 def get_loss_combiner(
-    config: ml_collections.ConfigDict,
+    config: ml_collections.FrozenConfigDict,
     num_losses: int
 ) -> Optional[nn.Module]:
   """Manufactures configured loss combiner."""
