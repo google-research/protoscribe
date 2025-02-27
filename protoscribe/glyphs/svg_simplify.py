@@ -40,22 +40,32 @@ XML_SVG_NAMESPACE = "http://www.w3.org/2000/svg"
 XML_SVG_POSITION_AND_GLYPH = "position-and-glyph"
 
 
-def _simplify_attributes(attributes: list[dict[str, str]]) -> None:
-  """Simplifies attributes to keep only the ones that we need.
+def _path_sort_key(path: path_lib.Path) -> tuple[int, float, float]:
+  """Returns sorting key tuple for the given path.
+
+  Make sure the document is "spelled" left-to-right and top-to-botoom by
+  sorting the paths using either of the following critera:
+    - If `position-and-glyph` attribute is present, sort first by the ascending
+      glyph position and as a secondary and tertiary keys by the ascending
+      offsets of the path along the x- and y-axis.
+    - If no glyph information is present sort by the ascending offset of the
+      path along the x- and y-axis.
 
   Args:
-    attributes: A list of attribute dictionaries. One for each path.
-  """
-  for attr in attributes:
-    # Remove all attributes apart from the crucial ones.
-    keys = [key for key in attr.keys() if key != XML_SVG_POSITION_AND_GLYPH]
-    for key in keys:
-      del attr[key]
+    path: SVG path instance.
 
-    # Set basic style attributes.
-    attr["fill"] = "none"
-    attr["stroke"] = "#000000"
-    attr["stroke-width"] = f"{STROKE_WIDTH.value}"
+  Returns: A three-tuple where
+    - The primary key is the glyph position.
+    - The secondary key is the x offset.
+    - The tertiary key is the y offset.
+  """
+  assert path.element is not None
+  primary = (
+      int(path.element.attrib[XML_SVG_POSITION_AND_GLYPH].split(",")[0])
+      if XML_SVG_POSITION_AND_GLYPH in path.element.attrib
+      else -1
+  )
+  return primary, float(path.start.real), float(path.start.imag)
 
 
 def num_segments(paths: list[path_lib.Path]) -> int:
@@ -90,12 +100,11 @@ def simplify_svg_tree(tree: ET.ElementTree) -> tuple[ET.ElementTree, int, int]:
   """
   ET.register_namespace("", XML_SVG_NAMESPACE)
 
-  # Fetch the original paths and attributes. Prune attributes only retaining
-  # the attibutes that we need.
-  paths, attributes = svg_to_paths.svgstr2paths(
-      ET.tostring(tree.getroot()).decode("utf8"), return_svg_attributes=False
+  # Fetch the original paths, ignore attributes which are retrieved from later
+  # from the flattened paths.
+  sanity_check_paths, _ = svg_to_paths.svgstr2paths(
+      ET.tostring(tree.getroot()).decode("utf8")
   )
-  _simplify_attributes(attributes)
 
   # Generate flattened version of the paths using the `Document` interface.
   # There should be the same number of those as in the original.
@@ -103,11 +112,26 @@ def simplify_svg_tree(tree: ET.ElementTree) -> tuple[ET.ElementTree, int, int]:
       ET.tostring(tree.getroot()).decode("utf8")
   )
   flat_paths = doc.paths()
-  if len(paths) != len(flat_paths):
+  if len(sanity_check_paths) != len(flat_paths):
     raise ValueError(
         f"Number of flattened paths {len(flat_paths)} should match the number "
-        f"of original paths {len(paths)}"
+        f"of original paths {len(sanity_check_paths)}"
     )
+
+  # Sort the paths and build the corresponding simplified attributes.
+  flat_paths = sorted(flat_paths, key=_path_sort_key)
+  attributes = []
+  for path in flat_paths:
+    attrib = {
+        "fill": "none",
+        "stroke": "#000000",
+        "stroke-width": f"{STROKE_WIDTH.value}",
+    }
+    if XML_SVG_POSITION_AND_GLYPH in path.element.attrib:
+      attrib[XML_SVG_POSITION_AND_GLYPH] = (
+          path.element.attrib[XML_SVG_POSITION_AND_GLYPH]
+      )
+    attributes.append(attrib)
 
   # Convert the paths to a simple XML element tree. Note, when converting the
   # attributes to `svgwrite.Drawing`, `svgwrite` replaces all the underscores
