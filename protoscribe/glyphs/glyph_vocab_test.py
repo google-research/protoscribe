@@ -15,6 +15,7 @@
 """Simple tests for glyph vocabulary."""
 
 import os
+import re
 
 from absl import flags
 from absl.testing import absltest
@@ -42,6 +43,13 @@ class GlyphVocabTest(absltest.TestCase):
   def testFindAllSVGFiles(self) -> None:
     svg_paths = lib.find_all_svg_files()
     self.assertLess(0, len(svg_paths))
+
+    # Check that we have multiple glyph variants available for a given category.
+    categories = ["bird", "grain", "tree"]
+    for category in categories:
+      p = re.compile(f"^.*/{category}[_]?[0-9]*.svg")
+      variant_svgs = [path for path in svg_paths if p.match(path)]
+      self.assertGreater(len(variant_svgs), 1)
 
     # Point at more glyphs.
     FLAGS.extension_glyphs_svg_dir = os.path.join(

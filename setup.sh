@@ -30,25 +30,25 @@ EOF
 # Quick sanity check that we have the necessary tools installed.
 PROTOC_COMPILER=$(which protoc)
 if [ $? -ne 0 ] ; then
-  echo "Protocol buffer compiler 'protoc' is not installed!"
+  echo "ERROR: Protocol buffer compiler 'protoc' is not installed!"
   exit 1
 fi
 GIT=$(which git)
 if [ $? -ne 0 ] ; then
-  echo "Git has not been installed!"
+  echo "ERROR: Git has not been installed!"
   exit 1
 fi
 
 # We must be running in a virtual environment. The following variable is
 # definitely set by 'venv'.
 if [ -z "${VIRTUAL_ENV}" ] ; then
-  echo "Looks like the script is not run in virtual environment"
+  echo "ERROR: Looks like the script is not run in virtual environment"
   exit 1
 fi
 
 # Install Python dependencies from requirements.txt
 if [ ! -r requirements.txt ] ; then
-  echo "The setup script should run from the home directory of " \
+  echo "ERROR: The setup script should run from the home directory of " \
     "the Protoscribe project."
   exit 1
 fi
@@ -79,7 +79,7 @@ CURRENT_DIR=$(pwd)
 BNC_URL="https://github.com/rwsproat/symbols"
 BNC_DIR="${CURRENT_DIR}/protoscribe/data/semantics/bnc"
 if [ ! -d "${BNC_DIR}" ] ; then
-  echo "BNC embeddings home directory not found!"
+  echo "ERROR: BNC embeddings home directory not found!"
   exit 1
 fi
 cd "${BNC_DIR}"
@@ -98,7 +98,7 @@ CURRENT_DIR=$(pwd)
 PHOIBLE_URL="https://github.com/phoible/dev"
 PHOIBLE_DIR=protoscribe/data/phonology
 if [ ! -d "${PHOIBLE_DIR}" ] ; then
-  echo "Phonology home directory not found!"
+  echo "ERROR: Phonology home directory not found!"
   exit 1
 fi
 cd "${PHOIBLE_DIR}"
@@ -110,7 +110,7 @@ cd dev
 cd "${CURRENT_DIR}"
 PHOIBLE_DATA_DIR="${PHOIBLE_DIR}/dev/data"
 if [ ! -d "${PHOIBLE_DATA_DIR}" ] ; then
-  echo "Failed to download PHOIBLE data!"
+  echo "ERROR: Failed to download PHOIBLE data!"
   exit 1
 fi
 
@@ -123,14 +123,36 @@ python "${PROCESS_PHOIBLE}" \
   --segment_features_tsv_file="${PHOIBLE_DIR}/phoible-segments-features.tsv" \
   --logtostderr
 if [ ! -f "${PHOIBLE_DIR}/phoible-phonemes.tsv" ] ; then
-  echo "PHOIBLE phoneme inventories failed to be generated"
+  echo "ERROR: PHOIBLE phoneme inventories failed to be generated"
   exit 1
 fi
 if [ ! -f "${PHOIBLE_DIR}/phoible-segments-features.tsv" ] ; then
-  echo "PHOIBLE segment inventories failed to be generated"
+  echo "ERROR: PHOIBLE segment inventories failed to be generated"
   exit 1
 fi
 
 # Install Princeton WordNet.
 echo "Installing Princeton Wordnet ..."
 python -m nltk.downloader wordnet
+
+# Install additional glyphs from ancient-things collection.
+echo "Installing ancient-things glyphs ..."
+ANCIENT_THINGS_URL="https://github.com/vvvlasenko/ancient-things"
+ANCIENT_THINGS_DIR="protoscribe/data/glyphs/generic/ancient_things"
+if [ -d "${ANCIENT_THINGS_DIR}" ] ; then
+  rm -rf "${ANCIENT_THINGS_DIR}"  # Remove previous export.
+fi
+mkdir -p "${ANCIENT_THINGS_DIR}"
+cd "${ANCIENT_THINGS_DIR}"  # Note, we clone without the repository root.
+"${GIT}" clone -n --depth=1 --filter=tree:0 "${ANCIENT_THINGS_URL}" .
+PENCIL_DIR="svg/pencil"
+"${GIT}" sparse-checkout set --no-cone "${PENCIL_DIR}"
+"${GIT}" checkout
+if [ ! -d "${PENCIL_DIR}" ] ; then
+  echo "ERROR: Failed to checkout SVGs!"
+  exit 1
+fi
+mv "${PENCIL_DIR}"/*.svg . && rmdir "${PENCIL_DIR}"
+cd "${CURRENT_DIR}"
+
+echo "Setup complete."

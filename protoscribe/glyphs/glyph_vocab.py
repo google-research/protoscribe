@@ -52,10 +52,11 @@ _EXTENSION_GLYPHS_SVG_DIR = flags.DEFINE_string(
     "Directory housing discovered extension glyphs in SVG format."
 )
 
-_GLYPHS_ROOT_DIR = "protoscribe/data/glyphs"
+_VANILLA_GLYPHS_ROOT_DIR = "protoscribe/data/glyphs"
 GLYPH_SET_DIRS = [
-    f"{_GLYPHS_ROOT_DIR}/generic/administrative_categories",
-    f"{_GLYPHS_ROOT_DIR}/generic/numbers",
+    f"{_VANILLA_GLYPHS_ROOT_DIR}/generic/administrative_categories",
+    f"{_VANILLA_GLYPHS_ROOT_DIR}/generic/numbers",
+    "protoscribe/data/glyphs/generic/ancient_things",
 ]
 
 # Name of the dummy glyph used for the unseen concepts.
