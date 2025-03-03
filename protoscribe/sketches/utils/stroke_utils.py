@@ -203,17 +203,18 @@ def stroke3_strokes_to_svg(
   width = x_max - x_min + 2 * offset
   height = y_max - y_min + 2 * offset
   buf = (
-      "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
-      "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" "
-      "xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
-      f"width=\"{width}\" height=\"{height}\" "
-      f"viewBox=\"0 0 {width} {height}\">\n"
+      svg_simplify_lib.basic_svg_xml_header(width, height) +
       f"<g transform=\"translate({-x_min} {-y_min})"
   )
   if scale_factor != 1.0:
     buf += f" scale({scale_factor})"
   buf += "\">\n"
   for lines in polylines:
+    if lines.shape[0] == 1:
+      # Disallow empty lines that only have an origin point. This can happen
+      # to decoder outputs if the model overpredicts the stroke separator
+      # tokens.
+      continue
     path_buf = (
         f"<path d=\"M{lines[0][0]} {lines[0][1]}"
     )

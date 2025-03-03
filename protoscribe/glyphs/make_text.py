@@ -159,7 +159,6 @@ def concat_xml_svgs(
     to_root.append(g)
 
   def find_paths(root):
-    prefix = "{%s}" % svg_simplify.XML_SVG_NAMESPACE
     path_types = [
         "path",
         "polygon",
@@ -171,7 +170,9 @@ def concat_xml_svgs(
     ]
     sub_paths = []
     for path_type in path_types:
-      sub_paths.extend(root.findall(f".//{prefix}{path_type}"))
+      sub_paths.extend(root.findall(
+          f"{svg_simplify.XML_SVG_FIND_TAG}{path_type}"
+      ))
     return sub_paths
 
   def propagate_transforms_to_paths(root):

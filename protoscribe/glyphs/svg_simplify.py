@@ -14,6 +14,7 @@
 
 """SVG simplification utilities."""
 
+import math
 import xml.etree.ElementTree as ET
 
 from absl import flags
@@ -27,17 +28,60 @@ STROKE_WIDTH = flags.DEFINE_float(
     "Stroke width used when generating SVG from individual strokes."
 )
 
-MARGIN_SIZE = flags.DEFINE_float(
-    "margin_size", 0.1,
+_MARGIN_SIZE = flags.DEFINE_float(
+    "margin_size", 0.05,
     "The minimum margin (empty area framing the collection of paths) size used "
     "for creating the canvas and background of the SVG."
 )
+
+_FIXED_SVG_WIDTH = flags.DEFINE_integer(
+    "fixed_svg_width", -1,
+    "Width of the SVG, also the width of the viewbox."
+)
+
+_FIXED_SVG_HEIGHT = flags.DEFINE_integer(
+    "fixed_svg_height", -1,
+    "Height of the SVG, also the height of the viewbox."
+)
+
+_SVG_MIN_DIM = flags.DEFINE_integer(
+    "svg_min_dim", 600,
+    "Fixed minimal dimension (width or height) or the resulting SVG. "
+    "This preserves the aspect ratio. Used when `fix_svg_size` flag "
+    "is disabled."
+)
+
+FLAGS = flags.FLAGS
 
 # XML namespace for the parser.
 XML_SVG_NAMESPACE = "http://www.w3.org/2000/svg"
 
 # Name of glyph affiliation attribute.
 XML_SVG_POSITION_AND_GLYPH = "position-and-glyph"
+
+# XML tag used for searching for paths.
+XML_SVG_FIND_TAG = ".//{%s}" % XML_SVG_NAMESPACE
+
+
+def basic_svg_xml_header(width: float, height: float) -> str:
+  """Returns basic XML SVG header for the document.
+
+  Base units (e.g., pixels `px`) are omitted.
+
+  Args:
+    width: Width of the document.
+    height: Height of the document.
+
+  Returns:
+    Header string.
+  """
+  return (
+      "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
+      "<svg version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" "
+      "xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
+      f"width=\"{int(width)}\" height=\"{int(height)}\" "
+      f"viewBox=\"0 0 {width} {height}\">\n"
+  )
 
 
 def _path_sort_key(path: path_lib.Path) -> tuple[int, float, float]:
@@ -83,6 +127,130 @@ def num_segments(paths: list[path_lib.Path]) -> int:
   return n
 
 
+def _bbox_with_margins_and_style(
+    paths: list[path_lib.Path],
+) -> tuple[float, float, float, float]:
+  """Returns the bounding box that takes into account margins and style.
+
+  Args:
+    paths: List of paths.
+
+  Returns:
+    The new viewbox (min_x, min_y, width, height).
+  """
+  # Bounding box that takes into account all the segment curves.
+  min_x, max_x, min_y, max_y = paths2svg.big_bounding_box(paths)
+  width, height = max_x - min_x, max_y - min_y
+  width = 1 if width == 0 else width
+  height = 1 if height == 0 else height
+
+  # Adjust the bounding box taking into account the style (currently
+  # the stroke width only) and margin size.
+  extra_style = STROKE_WIDTH.value
+  margin_size = _MARGIN_SIZE.value
+  min_x -= (margin_size * width + extra_style / 2.)
+  min_y -= (margin_size * height + extra_style / 2.)
+  width += (2 * margin_size * width + extra_style)
+  height += (2 * margin_size * height + extra_style)
+  return min_x, min_y, width, height
+
+
+def resize_paths(
+    paths: list[path_lib.Path],
+    new_width: int,
+    new_height: int,
+    min_dim: int = -1
+) -> tuple[
+    list[path_lib.Path], tuple[float, float, float, float]
+]:
+  """Resizes all the paths to the given size.
+
+  Args:
+    paths: List of paths.
+    new_width: New width.
+    new_height: New height.
+    min_dim: Minimal dimension (width or height). If positive, overrides the
+      fixed dimensions provided by `new_width` and `new_height`.
+
+  Returns:
+    A three-tuple consisting of:
+      - Resized paths (translated and scaled appropriately).
+      - The new viewbox (min_x, min_y, width, height).
+  """
+  min_x, min_y, width, height = _bbox_with_margins_and_style(paths)
+
+  # Check the requested new dimensions. These can be both fixed (if `min_dim`
+  # is negative) or one of them is specified by `min_dim`.
+  if min_dim > 0:
+    # When only one fixed dimension is specified, preserve the aspect ratio.
+    if width > height:
+      new_width = min_dim
+      new_height = int(math.ceil(min_dim * height / width))
+    else:
+      new_width = int(math.ceil(min_dim * width / height))
+      new_height = min_dim
+  elif new_width <= 0 or new_height <= 0:
+    raise ValueError("Both fixed width and height need to be specified!")
+  view_box = (0, 0, new_width, new_height)
+  scale_x = new_width / width
+  scale_y = new_height / height
+
+  # Transform the paths.
+  new_paths = []
+  for path in paths:
+    new_paths.append(
+        path
+        .translated(-complex(min_x, min_y))
+        .scaled(scale_x, scale_y)
+    )
+  return new_paths, view_box
+
+
+def _paths_to_svg_tree(
+    paths: list[path_lib.Path], glyphs_info: list[str]
+) -> ET.ElementTree:
+  """Converts the paths along with the glyph information to an XML tree.
+
+  Args:
+    paths: Path instances.
+    glyphs_info: Glyph information strings, one per path.
+
+  Returns:
+    SVG element tree.
+  """
+  paths, view_box = resize_paths(
+      paths,
+      new_width=_FIXED_SVG_WIDTH.value,
+      new_height=_FIXED_SVG_HEIGHT.value,
+      min_dim=_SVG_MIN_DIM.value
+  )
+  buf = basic_svg_xml_header(view_box[2], view_box[3])
+  for p, glyph_info in zip(paths, glyphs_info):
+    buf += (
+        f"<path d=\"{p.d()}\" "
+        f"fill=\"none\" stroke=\"#000000\" stroke-width=\"%f\" %s/>\n" % (
+            STROKE_WIDTH.value,
+            "%s=\"%s\" " % (
+                XML_SVG_POSITION_AND_GLYPH, glyph_info
+            ) if glyph_info else ""
+        )
+    )
+  buf += "</svg>"
+  return ET.ElementTree(ET.fromstring(buf))
+
+
+def find_paths(tree: ET.ElementTree) -> list[ET.Element]:
+  """Finds all the paths under the given XML element.
+
+  Args:
+    tree: XML tree.
+
+  Returns:
+    A list of paths as XML tree elements.
+  """
+  return tree.getroot().findall(f"{XML_SVG_FIND_TAG}path")
+
+
 def simplify_svg_tree(tree: ET.ElementTree) -> tuple[ET.ElementTree, int, int]:
   """Simplifies the structure of SVG XML tree.
 
@@ -118,35 +286,19 @@ def simplify_svg_tree(tree: ET.ElementTree) -> tuple[ET.ElementTree, int, int]:
         f"of original paths {len(sanity_check_paths)}"
     )
 
-  # Sort the paths and build the corresponding simplified attributes.
+  # Sort the paths and collect the glyph information, if present.
   flat_paths = sorted(flat_paths, key=_path_sort_key)
-  attributes = []
+  glyphs_info = []
   for path in flat_paths:
-    attrib = {
-        "fill": "none",
-        "stroke": "#000000",
-        "stroke-width": f"{STROKE_WIDTH.value}",
-    }
+    glyph_info = None
     if XML_SVG_POSITION_AND_GLYPH in path.element.attrib:
-      attrib[XML_SVG_POSITION_AND_GLYPH] = (
-          path.element.attrib[XML_SVG_POSITION_AND_GLYPH]
-      )
-    attributes.append(attrib)
+      glyph_info = path.element.attrib[XML_SVG_POSITION_AND_GLYPH]
+    glyphs_info.append(glyph_info)
 
-  # Convert the paths to a simple XML element tree. Note, when converting the
-  # attributes to `svgwrite.Drawing`, `svgwrite` replaces all the underscores
-  # with dashes in attribute names.
-  stroke_widths = [STROKE_WIDTH.value] * len(flat_paths)
-  simplified_svg = paths2svg.paths2Drawing(
-      paths=flat_paths,
-      attributes=attributes,
-      stroke_widths=stroke_widths,
-      margin_size=MARGIN_SIZE.value
-  )
-  simplified_xml_tree = ET.ElementTree(simplified_svg.get_xml())
-
-  # Sanity check that the paths are preserved.
-  new_paths = simplified_xml_tree.getroot().findall("path")
+  # Convert the paths to a simple XML element tree and check that the paths
+  # are preserved.
+  simplified_xml_tree = _paths_to_svg_tree(flat_paths, glyphs_info)
+  new_paths = find_paths(simplified_xml_tree)
   if len(new_paths) != len(flat_paths):
     raise ValueError(
         f"Number of flattened paths {len(flat_paths)} should match the number "

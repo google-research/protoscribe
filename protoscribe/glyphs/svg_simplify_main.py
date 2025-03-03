@@ -71,6 +71,7 @@ FLAGS.deltas = True
 FLAGS.path_is_stroke = True
 
 _MAX_NUMBER_VALUE = 10
+_MAX_NUMBER_GLYPH_VARIANTS = 5
 _NUMBERS_DIR = "protoscribe/data/glyphs/generic/numbers"
 
 
@@ -184,7 +185,10 @@ def main(argv: Sequence[str]) -> None:
       digit_xmls = []
       digit_names = []
       for digit_name in digits:
-        digit_path = os.path.join(_NUMBERS_DIR, f"{digit_name}.svg")
+        number_glyph_variant = random.randint(1, _MAX_NUMBER_GLYPH_VARIANTS)
+        digit_path = os.path.join(
+            _NUMBERS_DIR, f"{digit_name}_{number_glyph_variant}.svg"
+        )
         with open(digit_path, mode="rt", encoding="utf-8") as f:
           digit_xmls.append(ET.parse(f))
         digit_names.append(digit_name)
