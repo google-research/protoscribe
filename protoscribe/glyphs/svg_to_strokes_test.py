@@ -48,17 +48,17 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
       for line in stream:
         x, y = line.split()
         cls.golden_points.append((float(x), float(y)))
-    cls.deltas = []
+    cls.golden_deltas = []
     prev_x, prev_y = cls.golden_points[0]
     for x, y in cls.golden_points:
-      cls.deltas.append((x - prev_x, y - prev_y))
+      cls.golden_deltas.append((x - prev_x, y - prev_y))
       prev_x, prev_y = x, y
     # These were manually entered into the SVG, and are a bit silly since
     # normally the rabbit would be a single glyph. This is just to make sure
     # that the various parts get passed through.
     cls.rabbit_affiliations = (
-        [(0, "RABBIT_BODY")] * 93  # Largest piece, the body
-        + [(1, "RABBIT_RUMP")] * 6  # Next largest piece, the "rump" stroke
+        [(0, "RABBIT_BODY")] * 93  # Largest piece, the body.
+        + [(1, "RABBIT_RUMP")] * 6  # Next largest piece, the "rump" stroke.
         + [(2, "RABBIT_EYEBALL")] * 2  # Then the eye.
     )
 
@@ -76,7 +76,6 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
     strokes, glyph_affiliations = lib.svg_file_to_strokes(
         self.rabbit_svg,
     )
-
     self._check_strokes_type(strokes)
     self.assertEqual(len(strokes), len(glyph_affiliations))
     self.assertEqual(glyph_affiliations, self.rabbit_affiliations)
@@ -94,7 +93,7 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
     points = []
     for stroke in strokes:
       points.extend([p for p in stroke])
-    self.assertEqual(self.deltas, points)
+    self.assertEqual(self.golden_deltas, points)
 
   def testSvgStringToStrokes(self) -> None:
     rabbit = ET.parse(self.rabbit_svg)

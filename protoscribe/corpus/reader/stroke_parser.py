@@ -92,7 +92,20 @@ def _strokes3_to_strokes5(
     strokes_3: tf.Tensor,
     max_stroke_sequence_length: int
 ):
-  """Generates stroke-5 tensor from stroke-3 format tensor."""
+  """Generates stroke-5 tensor from stroke-3 format tensor.
+
+  Since the stroke-5 format is used for continuous sequence prediction, there is
+  no tokenizer. This method explicitly inserts BOS and EOS vectors to the
+  beginning and end of sequence, respectively.
+
+  Args:
+    config: Configuration dictionary.
+    strokes_3: Sketch in stroke-3 format.
+    max_stroke_sequence_length: Maximum sequence length.
+
+  Returns:
+    Sketch in stroke-5 format.
+  """
   delta_x = strokes_3[:, 0]  # Δx.
   delta_y = strokes_3[:, 1]  # Δy.
   pen_touching = 1 - strokes_3[:, 2]  # $p_1$.
@@ -103,8 +116,7 @@ def _strokes3_to_strokes5(
   )
   strokes_5 = strokes_5[:max_stroke_sequence_length - 2, :]
 
-  # For autoregressive mode either include BOS (for inputs) or EOS (for
-  # targets).
+  # Explicitly insert BOS and EOS vectors.
   real_length = tf.shape(strokes_5)[0] + 1
   strokes_5 = tf.concat([
       tf.constant([[0., 0., 1, 0, 0]], dtype=tf.float32),

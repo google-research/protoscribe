@@ -25,10 +25,9 @@ python protoscribe/corpus/tools/sample_from_corpus_main.py \
   --dataset_dir "${DATASET_DIR}" \
   --sample_size 100 \
   --max_stroke_sequence_length 1000 \
-  --split test \
   --stroke_normalization_type "z-standardize" \
   --stroke_tokenizer_vocab_file protoscribe/data/glyphs/tokenizer/generic/vocab2048_normalized_sketchrnn.npy \
-  --fast_stroke_tokenizer \
+  --stroke_tokenizer_mode all \
   --output_dir /tmp/tmp \
   --logtostderr
 """
@@ -37,6 +36,7 @@ from collections.abc import Sequence
 import itertools
 import logging
 import os
+from typing import Any, Iterable
 
 from absl import app
 from absl import flags
@@ -44,6 +44,7 @@ import ml_collections
 import numpy as np
 from protoscribe.corpus.reader import dataset_defaults as ds_lib
 from protoscribe.corpus.reader import tasks as tasks_lib
+from protoscribe.corpus.tools import sample_from_corpus
 from protoscribe.sketches.utils import stroke_stats as norm_lib
 from protoscribe.sketches.utils import stroke_tokenizer as tokenizer_lib
 from protoscribe.sketches.utils import stroke_utils as strokes_lib
@@ -51,6 +52,7 @@ import t5
 import tensorflow as tf
 
 Array = np.ndarray
+TokenizerMode = sample_from_corpus.TokenizerMode
 
 _SAMPLE_SIZE = flags.DEFINE_integer(
     "sample_size", 10,
@@ -91,14 +93,12 @@ _STROKE_TOKENIZER_VOCAB_FILE = flags.DEFINE_string(
     "If supplied, tokenize and reconstruct the sketch."
 )
 
-_FAST_STROKE_TOKENIZER = flags.DEFINE_bool(
-    "fast_stroke_tokenizer", False,
-    "Use fast tokenization (only applies if tokenization is enabled above)."
-)
-
-_TF_STROKE_TOKENIZER = flags.DEFINE_bool(
-    "tf_stroke_tokenizer", False,
-    "If enabled, use TF tokenizer rather than Jax-based one."
+_STROKE_TOKENIZER_MODE = flags.DEFINE_enum_class(
+    "stroke_tokenizer_mode",
+    default=TokenizerMode.SLOW,
+    enum_class=TokenizerMode,
+    help="Stroke tokenizer mode to use. This can be either the default slow "
+    "mode, JAX or TensorFlow."
 )
 
 _STROKE_RANDOM_SCALE_FACTOR = flags.DEFINE_float(
@@ -111,7 +111,51 @@ _SAVE_SVG = flags.DEFINE_bool(
     "Save SVGs in addition to PNGs."
 )
 
+_FIND_CONCEPTS = flags.DEFINE_list(
+    "find_concepts", [],
+    "Only sample documents that relate to the given list of concepts."
+)
+
 _TASK_NAME = "sampler"
+
+
+def _sample_examples(ds: tf.data.Dataset) -> Iterable[dict[str, Any]]:
+  """Samples collection of examples from a dataset.
+
+  Args:
+    ds: Dataset instance.
+
+  Returns:
+    An iterable containing documents represented as feature dictionaries.
+
+  Raises:
+    ValueError if concept is not defined in one of the documents.
+  """
+  ds_iter = ds.as_numpy_iterator()
+  if not _FIND_CONCEPTS.value:
+    return itertools.islice(ds_iter, _SAMPLE_SIZE.value)
+
+  logging.info(
+      "Searching for %d concepts in %s ...",
+      _SAMPLE_SIZE.value, _FIND_CONCEPTS.value
+  )
+  num_found = 0
+  examples = []
+  for doc_id, features in enumerate(ds_iter):
+    if "concept.name" not in features:
+      raise ValueError(
+          f"Concept name not found in features for example {doc_id}"
+      )
+    concept = features["concept.name"].decode("utf-8")
+    concept = concept.split("_")[0]
+    if concept in _FIND_CONCEPTS.value:
+      logging.info("[%d] Found %s in doc %d ...", num_found, concept, doc_id)
+      num_found += 1
+      examples.append(features)
+      if num_found == _SAMPLE_SIZE.value:
+        return examples
+
+  return examples
 
 
 def _polylines_summary(polylines: list[Array]) -> str:
@@ -137,56 +181,74 @@ def _save_sketch(
       if sketch_3_or_5.shape[1] == 5 else sketch_3_or_5
   )
   polylines = strokes_lib.stroke3_deltas_to_polylines(sketch3)
+  polylines_summary = _polylines_summary(polylines)
+
+  # Save stroke-3 format strokes to text.
+  output_file = os.path.join(_OUTPUT_DIR.value, f"{sketch_name}_stroke3.txt")
+  np.savetxt(output_file, sketch3, fmt="%.4f")
 
   # Save regular raster image.
   image = strokes_lib.polylines_to_raster_image(polylines)
   output_file = os.path.join(_OUTPUT_DIR.value, f"{sketch_name}.png")
   logging.info(
       "[%d] [%s] Saving %s (%d polylines, strokes: %s) ...",
-      sketch_id, sketch_name, output_file,
-      len(polylines), _polylines_summary(polylines)
+      sketch_id, sketch_name, output_file, len(polylines), polylines_summary
   )
   image.save(output_file)
 
   # Save SVG.
   if _SAVE_SVG.value:
     output_file = os.path.join(_OUTPUT_DIR.value, f"{sketch_name}.svg")
-    logging.info("[%d] [%s] Saving %s ...", sketch_id, sketch_name, output_file)
+    logging.info(
+        "[%d] [%s] Saving %s (%d polylines, strokes: %s) ...",
+        sketch_id, sketch_name, output_file, len(polylines), polylines_summary
+    )
     strokes_lib.stroke3_strokes_to_svg_file(sketch3, output_file)
 
 
-def _tokenize_and_reconstruct(
+def _tokenize_and_reconstruct_to_file(
+    config: ml_collections.FrozenConfigDict,
     normalized_sketch5: Array,
     glyph_affiliations: Array,
-    tokenizer: tokenizer_lib.StrokeTokenizer
-) -> Array:
-  """Checks tokenization/detokenization.
-
-  Note that the tokenizer is trained on normalized sketches. Sketch
-  needs de-normalization before saving.
+    sketch_stroke_stats: ds_lib.StrokeStats,
+    tokenizer: tokenizer_lib.StrokeTokenizer,
+    tokenizer_mode: TokenizerMode,
+    doc_id: int,
+    doc_text: str
+) -> None:
+  """Tokenizes, reconstructs and saves the result to file.
 
   Args:
+    config: Configuraiton for tokenizer and normalizer.
     normalized_sketch5: Sketch in stroke5 format.
     glyph_affiliations: Glyph affiliations for each stroke.
+    sketch_stroke_stats: Stroke statistics.
     tokenizer: Tokenizer object.
-
-  Returns:
-    Reconstructed strokes in stroke3 format.
+    tokenizer_mode: One of the three possible modes of tokenization.
+      One of: slow (regular mode, default), Jax or TensorFlow.
+    doc_id: ID of the current document.
+    doc_text: Contents of the accounting document.
   """
-  sketch3 = strokes_lib.stroke5_to_stroke3(normalized_sketch5)
-  if _FAST_STROKE_TOKENIZER.value:
-    if not _TF_STROKE_TOKENIZER.value:
-      tokens = tokenizer.encode(sketch3)
-    else:
-      tokens, _, _ = tokenizer.tf_encode(
-          tf.convert_to_tensor(sketch3, dtype=tf.float32),
-          tf.convert_to_tensor(glyph_affiliations, dtype=tf.int32)
-      )
-      tokens = tokens.numpy()
-  else:
-    tokens = tokenizer.slow_encode(sketch3)
-  sketch3 = tokenizer.decode(tokens)
-  return np.float32(sketch3)
+  normalized_sketch3 = sample_from_corpus.tokenize_and_reconstruct(
+      normalized_sketch5,
+      glyph_affiliations=glyph_affiliations,
+      tokenizer=tokenizer,
+      tokenizer_mode=tokenizer_mode
+  )
+  sketch3_for_display = normalized_sketch3
+  if norm_lib.should_normalize_strokes(config):
+    sketch3_for_display = norm_lib.denormalize_strokes_array(
+        config, sketch_stroke_stats, normalized_sketch3
+    )
+
+  vocab_size = tokenizer.codebook.shape[0]
+  tokenizer_mode = tokenizer_mode.value.lower()
+  sketch_name = f"{doc_text}_tok_{tokenizer_mode}_{vocab_size}"
+  _save_sketch(
+      sketch_3_or_5=sketch3_for_display,
+      sketch_id=doc_id,
+      sketch_name=sketch_name
+  )
 
 
 def main(argv: Sequence[str]) -> None:
@@ -214,18 +276,25 @@ def main(argv: Sequence[str]) -> None:
         _STROKE_TOKENIZER_VOCAB_FILE.value, config.max_stroke_sequence_length
     )
 
-  examples = itertools.islice(ds.as_numpy_iterator(), _SAMPLE_SIZE.value)
+  examples = _sample_examples(ds)
   for i, features in enumerate(examples):
+    # Form name of the file.
     if "text.text" not in features:
       raise ValueError(f"[{i}] Bad dataset: text expected!")
     text = features["text.text"].decode("utf-8")
     text = text.replace(" ", "_")
+    if "doc.id" not in features:
+      raise ValueError(f"[{i}] Document ID not found!")
+    doc_id = int(features["doc.id"])
+    text = f"{text}_{doc_id}"
+
     if "sketch.glyph_affiliations.ids" not in features:
       raise ValueError(f"[{i}] Bad dataset: No glyph affiliations!")
     glyph_affiliations = features["sketch.glyph_affiliations.ids"]
 
     # Read the strokes (stroke-5 format). This are normalized by the corpus
-    # reader.
+    # reader. When creating the strokes-5 format the corpus reader inserts
+    # explicit BOS and EOS vectors to start and end of the stroke sequence.
     if "strokes" not in features:
       raise ValueError(f"[{i}] Bad dataset: strokes expected!")
     normalized_sketch5 = features["strokes"]
@@ -240,22 +309,33 @@ def main(argv: Sequence[str]) -> None:
 
     # If tokenizer is configured, test tokenization/detokenization process.
     if tokenizer:
-      normalized_sketch3 = _tokenize_and_reconstruct(
-          normalized_sketch5, glyph_affiliations, tokenizer
-      )
-      sketch3_for_display = normalized_sketch3
-      if norm_lib.should_normalize_strokes(config):
-        sketch3_for_display = norm_lib.denormalize_strokes_array(
-            config, sketch_stroke_stats, normalized_sketch3
+      if _STROKE_TOKENIZER_MODE.value != TokenizerMode.ALL:
+        _tokenize_and_reconstruct_to_file(
+            config,
+            normalized_sketch5,
+            glyph_affiliations=glyph_affiliations,
+            sketch_stroke_stats=sketch_stroke_stats,
+            tokenizer=tokenizer,
+            tokenizer_mode=_STROKE_TOKENIZER_MODE.value,
+            doc_id=i,
+            doc_text=text
         )
-
-      vocab_size = tokenizer.codebook.shape[0]
-      sketch_name = f"{text}_tok{vocab_size}"
-      _save_sketch(
-          sketch_3_or_5=sketch3_for_display,
-          sketch_id=i,
-          sketch_name=sketch_name
-      )
+      else:
+        for mode in [
+            TokenizerMode.SLOW,
+            TokenizerMode.JAX,
+            TokenizerMode.TF
+        ]:
+          _tokenize_and_reconstruct_to_file(
+              config,
+              normalized_sketch5,
+              glyph_affiliations=glyph_affiliations,
+              sketch_stroke_stats=sketch_stroke_stats,
+              tokenizer=tokenizer,
+              tokenizer_mode=mode,
+              doc_id=i,
+              doc_text=text
+          )
 
 
 if __name__ == "__main__":

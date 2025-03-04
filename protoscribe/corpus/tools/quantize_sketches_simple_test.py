@@ -93,7 +93,7 @@ class QuantizeSketchesSimpleTest(absltest.TestCase):
     )
     self.assertEqual(points.shape, (points_to_sample, 2))
     self.assertEqual(points.tolist(), [
-        [0.0, 0.0], [4.5, 4.5], [6.0, 6.0], [0.0, 0.0], [0.0, 0.0], [8.0, 8.0]
+        [1.0, 1.0], [4.5, 4.5], [5.0, 5.0], [0.0, 0.0], [5.5, 5.5], [8.0, 8.0]
     ])
 
 

@@ -49,7 +49,7 @@ def _collect_points_basic(
       raise ValueError(f"[{i}] Bad dataset: strokes expected!")
     sketch = features["strokes"]
     sketch3 = strokes_lib.stroke5_to_stroke3(sketch)
-    sketches.append(sketch3[1:, :2].astype(dtype=np.float32))
+    sketches.append(sketch3[:, :2].astype(dtype=np.float32))
 
   points = np.concatenate(sketches)
   logging.info("Collected %d points.", points.shape[0])

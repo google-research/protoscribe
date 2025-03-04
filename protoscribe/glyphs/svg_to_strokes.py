@@ -281,7 +281,7 @@ def svg_to_strokes(
           x, y, _ = np.matmul(matrix, [x, y, 1]).tolist()
         x, y = _rotate(x, y, angle)
         x, y = scale * x + trans_x, scale * y + trans_y
-        stroke.append((x, y))
+        stroke.append((float(x), float(y)))
       if path_is_stroke:
         path_strokes.extend(stroke)
       else:

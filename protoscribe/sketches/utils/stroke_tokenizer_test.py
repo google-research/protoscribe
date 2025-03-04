@@ -131,6 +131,8 @@ class StrokeTokenizerTest(absltest.TestCase):
     x = tf.constant([15])
     result = lib.tf_insert(x, 0, -1)
     np.testing.assert_array_equal(result, [-1, 15])
+    result = lib.tf_insert(x, 1, -1)
+    np.testing.assert_array_equal(result, [15, -1])
 
     x = tf.constant([25, 32, 14, 29, 54, 98])
     insert_pos = tf.constant([1, 3, 5])

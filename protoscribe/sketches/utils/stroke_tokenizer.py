@@ -256,8 +256,9 @@ class StrokeTokenizer:
     out = _find_closest_codes(strokes3[:, :2], self.codebook)
     out += CENTROID_OFFSET  # Shift because of the control tokens.
     pen_up = jnp.where(strokes3[:, 2] == 1)[0]
-    # The separator is inserted *before* the condition, hence we offset the pen
-    # lifted indices by one.
+    # Assemble insertion indices. TF inserts *before* the condition index,
+    # hence we offset the pen lifted indices by one in order to insert the
+    # separator after the condition.
     out = jnp.insert(out, pen_up + 1, Token.STROKE_SEP)
     out = jnp.insert(out, 0, Token.START_OF_SKETCH)
     out = jnp.append(out, Token.END_OF_SKETCH)
@@ -277,12 +278,12 @@ class StrokeTokenizer:
     """Encodes the sequence of strokes in stroke-3 format into tokens.
 
     Tensorflow version. Please note: This version also takes the glyph
-    affiliations into the account and re-arranges these to match the resulting
-    tokens.
+    affiliations (IDs of the glyphs rather than their positions) into account
+    and re-arranges these to match the resulting tokens.
 
     Args:
       strokes3: Tensor of strokes in stroke-3 format.
-      glyph_affiliations_ids: Glyph affiliations tensor.
+      glyph_affiliations_ids: Glyph affiliations tensor consisting of glyph IDs.
 
     Returns:
       A tuple of three tensors: the tokens, their glyph affiliations and
@@ -292,11 +293,11 @@ class StrokeTokenizer:
         strokes3, 2, "Wrong rank for strokes-3 tensor (%s)" % tf.rank(strokes3)
     )
 
-    # Assemble insertion indices. The separator is inserted *before* the
-    # condition, hence we offset the pen lifted indices by one.
+    # Assemble insertion indices. TF inserts *before* the condition index,
+    # hence we offset the pen lifted indices by one in order to insert the
+    # separator after the condition.
     pen_up = tf.cast(tf.where(strokes3[:, 2] == 1), dtype=tf.int32)
     pen_up = tf.squeeze(pen_up + 1)
-
     # Find centroids. Shift the token values because of the control tokens.
     tokens = _tf_find_closest_codes(
         strokes3[:, :2],
@@ -331,7 +332,6 @@ class StrokeTokenizer:
 
   def slow_encode(self, strokes3: Tensor) -> Tensor:
     """Slow (sequential) encoding of strokes in stroke-3 format."""
-    strokes3 = jnp.append(strokes3, jnp.zeros((1, 3)), axis=0)
     out = self.knn.kneighbors(X=strokes3[:, :2], return_distance=False)
     out = out.flatten()
     out += CENTROID_OFFSET  # Shift because of the control tokens.

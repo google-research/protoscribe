@@ -66,20 +66,17 @@ class StrokeUtilsTest(absltest.TestCase):
         ]
     )
     # Note, there is one extra BOS token inserted at the beginning of a
-    # sequence by the conversion from stroke-3 to stroke-5 format.
+    # sequence by the conversion from stroke-3 to stroke-5 format. This
+    # token should be removed by stroke-5 to stroke-3 inverse transformation.
     new_strokes3 = lib.stroke5_to_stroke3(strokes5)
-    self.assertEqual(strokes3.tolist(), new_strokes3[1:, :].tolist())
+    self.assertEqual(strokes3.tolist(), new_strokes3.tolist())
 
   def test_concrete_svg_build_time_stroke_points(self):
     """Tests the point generation build-time API."""
     glyph_path = os.path.join(
-        absltest.get_default_test_srcdir(),
-        _TEST_DATA_DIR,
-        "field.svg"
+        absltest.get_default_test_srcdir(), _TEST_DATA_DIR, "field.svg"
     )
-    svg_tree, _, _ = make_text.concat_svgs(
-        [glyph_path], ["field"]
-    )
+    svg_tree, _, _ = make_text.concat_svgs([glyph_path], ["field"])
     strokes, glyph_affiliations = svg_to_strokes.svg_tree_to_strokes_for_test(
         svg_tree, points_per_segment=_POINTS_PER_SEGMENT
     )
@@ -91,19 +88,22 @@ class StrokeUtilsTest(absltest.TestCase):
     self.assertNotEmpty(x_stroke_points)
     self.assertEqual(len(x_stroke_points), len(y_stroke_points))
 
-    # Reconstruct individual strokes.
-    sketch = []
+    # Reconstruct sketch from points individual points.
+    reconstructed_strokes = []
     stroke = []
-    x = None
-    for x in x_stroke_points:
+    x, y = None, None
+    for x, y in zip(x_stroke_points, y_stroke_points):
       if x == lib.END_OF_STROKE:
+        self.assertEqual(y, lib.END_OF_STROKE)
         self.assertNotEmpty(stroke)
-        sketch.append(stroke)
+        reconstructed_strokes.append(stroke)
+        stroke = []
       else:
-        stroke.append(x)
-    self.assertEqual(x, lib.END_OF_STROKE)
-    self.assertNotEmpty(sketch)
-    self.assertLen(sketch, num_strokes)
+        stroke.append((x, y))
+    self.assertEqual((x, y), (lib.END_OF_STROKE, lib.END_OF_STROKE))
+    self.assertNotEmpty(reconstructed_strokes)
+    self.assertLen(reconstructed_strokes, num_strokes)
+    self.assertEqual(reconstructed_strokes, strokes)
 
   def test_stroke3_strokes_to_svg_file(self):
     """Tests the stroke-to-SVG conversion."""

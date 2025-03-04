@@ -79,6 +79,10 @@ def stroke3_to_stroke5(strokes_3: Array, max_len: int) -> tuple[Array, int]:
 def stroke5_to_stroke3(strokes5: Array) -> Array:
   """Converts from stroke-5 format back to stroke-3.
 
+  The conversion below assumes that the input strokes contain BOS and EOS
+  vectors, which are omitted from the conversion. The stroke-3 format does
+  not require them.
+
   Args:
     strokes5: Array of strokes in strokes-5 format.
 
@@ -88,6 +92,9 @@ def stroke5_to_stroke3(strokes5: Array) -> Array:
 
   chex.assert_rank(strokes5, 2)
   chex.assert_shape(strokes5, (None, 5))
+
+  if strokes5[0, :].tolist() == [0., 0., 1., 0., 0.]:
+    strokes5 = strokes5[1:, :]  # Strip BOS.
 
   length = 0
   for i in range(strokes5.shape[0]):
