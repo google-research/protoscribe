@@ -49,7 +49,7 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
         x, y = line.split()
         cls.golden_points.append((float(x), float(y)))
     cls.golden_deltas = []
-    prev_x, prev_y = cls.golden_points[0]
+    prev_x, prev_y = 0., 0.
     for x, y in cls.golden_points:
       cls.golden_deltas.append((x - prev_x, y - prev_y))
       prev_x, prev_y = x, y
@@ -73,9 +73,7 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
 
   @flagsaver.flagsaver(deltas=False)
   def testSimplePointConversion(self) -> None:
-    strokes, glyph_affiliations = lib.svg_file_to_strokes(
-        self.rabbit_svg,
-    )
+    strokes, glyph_affiliations = lib.svg_file_to_strokes(self.rabbit_svg)
     self._check_strokes_type(strokes)
     self.assertEqual(len(strokes), len(glyph_affiliations))
     self.assertEqual(glyph_affiliations, self.rabbit_affiliations)
@@ -86,9 +84,7 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
 
   @flagsaver.flagsaver(deltas=True)
   def testDeltaPointConversion(self) -> None:
-    strokes, glyph_affiliations = lib.svg_file_to_strokes(
-        self.rabbit_svg,
-    )
+    strokes, glyph_affiliations = lib.svg_file_to_strokes(self.rabbit_svg)
     self.assertEqual(glyph_affiliations, self.rabbit_affiliations)
     points = []
     for stroke in strokes:
@@ -97,9 +93,7 @@ class SVGToStrokesTest(parameterized.TestCase, absltest.TestCase):
 
   def testSvgStringToStrokes(self) -> None:
     rabbit = ET.parse(self.rabbit_svg)
-    strokes, glyph_affiliations = lib.svg_tree_to_strokes(
-        rabbit,
-    )
+    strokes, glyph_affiliations = lib.svg_tree_to_strokes(rabbit)
     self.assertEqual(glyph_affiliations, self.rabbit_affiliations)
     points = []
     for stroke in strokes:

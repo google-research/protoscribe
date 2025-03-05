@@ -311,7 +311,11 @@ def svg_to_strokes(
     strokes = [simplify_rdp(stroke, rdp_tolerance) for stroke in strokes]
 
   if strokes and deltas:
-    prev_x, prev_y = strokes[0][0]
+    # Compute relative instead of absolute point positions. The first point in
+    # the first stroke is absolute, the rest are absolute. This is to be
+    # compatible with various stroke-to-polylines conversion APIs in
+    # protoscribe/sketches/utils/stroke_utils.py.
+    prev_x, prev_y = 0., 0.
     new_strokes = []
     for stroke in strokes:
       new_stroke = []

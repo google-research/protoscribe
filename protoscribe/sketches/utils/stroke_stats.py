@@ -14,11 +14,12 @@
 
 """Utilities for stroke statistics and transformations."""
 
+from __future__ import annotations
+
 import dataclasses
 import json
 import logging
 import math
-from typing import Union
 
 import jax.numpy as jnp
 import ml_collections
@@ -28,8 +29,8 @@ import tensorflow as tf
 import glob
 import os
 
-FinalStrokeStats = dict[str, Union[int, float, tuple[float, float]]]
-Tensor = Union[jnp.ndarray, np.ndarray, tf.Tensor]
+FinalStrokeStats = dict[str, int | float | tuple[float, float]]
+Tensor = jnp.ndarray | np.ndarray | tf.Tensor
 
 
 @dataclasses.dataclass
@@ -68,7 +69,7 @@ class StrokeStats:
   k_x: float = 0.
   k_y: float = 0.
 
-  def update_point(self, x, y) -> None:
+  def update_point(self, x: float, y: float) -> None:
     """Update the stats from observing a single point."""
     if self.count == 0:
       self.k_x = x
@@ -85,7 +86,7 @@ class StrokeStats:
     self.min_y = min(self.min_y, y)
     self.max_y = max(self.max_y, y)
 
-  def accumulate(self, stats) -> None:
+  def accumulate(self, stats: StrokeStats) -> None:
     """Accumulates the data from the other stats instance."""
     self.count += stats.count
     self.sum_x += stats.sum_x
@@ -249,12 +250,13 @@ def denormalize_strokes_array(
     strokes = np.stack(
         [x, y, strokes[:, 2], strokes[:, 3], strokes[:, 4]], axis=1
     )
-  elif strokes.shape[1] == 3:  # sketch-3 format.
+    # Keep BOS and EOS.
+    strokes[0, 0:2] = 0.
+    strokes[-1, 0:2] = 0.
+  elif strokes.shape[1] == 3:
+    # Sketch is in sketch-3 format for which BOS and EOS are not needed.
     strokes = np.stack([x, y, strokes[:, 2]], axis=1)
   else:
-    raise RuntimeError("Unknown sketch format!")
+    raise RuntimeError(f"Unknown sketch format. Bad shape: {strokes.shape}")
 
-  # Keep BOS and EOS.
-  strokes[0, 0:2] = 0.
-  strokes[-1, 0:2] = 0.
   return strokes

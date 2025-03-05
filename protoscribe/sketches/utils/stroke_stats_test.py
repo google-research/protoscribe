@@ -16,30 +16,42 @@
 
 import os
 
-from absl import flags
 from absl.testing import absltest
 from absl.testing import parameterized
 import ml_collections
 import numpy as np
 from protoscribe.sketches.utils import stroke_stats as lib
 
-FLAGS = flags.FLAGS
-
 _STROKE_LENGTH = 800
 _STROKE_DIM = 3
 _TRANSLATE = -2.0
 _SCALE = 9.0
 
+_TEST_DATA_DIR = (
+    "protoscribe/sketches/utils/testdata"
+)
+
 
 class StrokeStatsTest(parameterized.TestCase):
 
-  @parameterized.parameters("none", "z-standardize", "min-max", "mean-norm",
-                            "sketch-rnn", "det-covar")
-  def test_normalization(self, norm_type):
+  def _get_stats(
+      self, config: ml_collections.FrozenConfigDict
+  ) -> lib.FinalStrokeStats:
+    """Reads stroke statistics from a predefined location."""
     stats_file = os.path.join(
-        FLAGS.test_srcdir,
-        "protoscribe/sketches/utils",
-        "testdata/stroke_stats.json")
+        absltest.get_default_test_srcdir(), _TEST_DATA_DIR, "stroke_stats.json"
+    )
+    return lib.load_stroke_stats(config, stats_file)
+
+  @parameterized.named_parameters(
+      ("none", "none"),
+      ("z-standardize", "z-standardize"),
+      ("min-max", "min-max"),
+      ("mean-norm", "mean-norm"),
+      ("sketch-rnn", "sketch-rnn"),
+      ("det-covar", "det-covar"),
+  )
+  def test_normalization(self, norm_type):
     config = ml_collections.FrozenConfigDict()
     self.assertFalse(lib.should_normalize_strokes(config))
     config = ml_collections.FrozenConfigDict({
@@ -49,9 +61,13 @@ class StrokeStatsTest(parameterized.TestCase):
       self.assertFalse(lib.should_normalize_strokes(config))
     else:
       self.assertTrue(lib.should_normalize_strokes(config))
-    stats = lib.load_stroke_stats(config, stats_file)
+    stats = self._get_stats(config)
+
+    # Mock strokes.
     x = _TRANSLATE + _SCALE * np.random.rand(_STROKE_LENGTH, _STROKE_DIM)
     y = _TRANSLATE + _SCALE * np.random.rand(_STROKE_LENGTH, _STROKE_DIM)
+
+    # Normalize and reconstruct.
     new_x, new_y = lib.normalize_strokes(config, stats, x, y)
     if norm_type == "none":
       np.testing.assert_array_equal(new_x, x)

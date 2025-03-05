@@ -164,9 +164,7 @@ def _polylines_summary(polylines: list[Array]) -> str:
 
 
 def _save_sketch(
-    sketch_3_or_5: Array,
-    sketch_id: int,
-    sketch_name: str
+    sketch_3_or_5: Array, sketch_id: int, sketch_name: str
 ) -> None:
   """Saves sketch with stroke-5 structure in various formats.
 
