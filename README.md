@@ -85,6 +85,9 @@ The important directories are:
     dealing with SVGs, but also with discrete glyph vocabularies, i.e.
     [`glyph_vocab.py`](protoscribe/glyphs/glyph_vocab.py).
 
+*   [models](protoscribe/models): Discrete and
+    stroke-based glyph synthesis models and respective configurations.
+
 *   [semantics](protoscribe/semantics): Basic helper
     packages for representing knowledge about categories.
 
