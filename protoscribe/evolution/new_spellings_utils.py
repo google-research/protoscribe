@@ -34,16 +34,16 @@ GlyphInfo = results_parser_and_pruner.GlyphInfo
 _SEMANTIC_JSONL_FILE = flags.DEFINE_string(
     "semantic_jsonl_file",
     None,
-    "Path to JSONL file extracted with `glyphs_from_jsonl.sh` (for discrete "
-    "glyphs) or `sketches_from_jsonl.sh` (for sketches) from semantic model "
+    "Path to JSONL file extracted with `glyphs_from_jsonl` (for discrete "
+    "glyphs) or `sketches_from_jsonl` (for sketches) from semantic model "
     "inference.",
 )
 
 _PHONETIC_JSONL_FILE = flags.DEFINE_string(
     "phonetic_jsonl_file",
     None,
-    "Path to JSONL file extracted with `glyphs_from_jsonl.sh` (for discrete "
-    "glyphs) or `sketches_from_jsonl.sh` (for sketches) from phonetic model "
+    "Path to JSONL file extracted with `glyphs_from_jsonl` (for discrete "
+    "glyphs) or `sketches_from_jsonl` (for sketches) from phonetic model "
     "inference.",
 )
 
