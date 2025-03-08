@@ -20,7 +20,7 @@ sequences of strings.
 """
 
 import jiwer
-from t5.evaluation import metrics as t5_metrics
+import numpy as np
 
 
 def _stringify_tokens(tokens: list[list[int]]) -> list[str]:
@@ -30,7 +30,8 @@ def _stringify_tokens(tokens: list[list[int]]) -> list[str]:
 
 
 def sequence_accuracy(
-    targets: list[list[int]], predictions: list[list[int]]
+    targets: list[list[int]],
+    predictions: list[list[int]]
 ) -> dict[str, float]:
   """Computes per-sequence accuracy.
 
@@ -44,9 +45,13 @@ def sequence_accuracy(
   Returns:
     float. Average sequence-level accuracy.
   """
-  return t5_metrics.sequence_accuracy(
-      _stringify_tokens(targets), _stringify_tokens(predictions)
+  target_toks = _stringify_tokens(targets)
+  prediction_toks = _stringify_tokens(predictions)
+  assert len(target_toks) == len(prediction_toks)
+  seq_acc = 100. * np.mean(
+      [p == t for p, t in zip(prediction_toks, target_toks)]
   )
+  return {"sequence_accuracy": seq_acc}
 
 
 def wer(

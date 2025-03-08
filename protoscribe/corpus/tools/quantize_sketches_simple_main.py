@@ -37,8 +37,8 @@ import ml_collections
 import numpy as np
 from protoscribe.corpus.reader import tasks as tasks_lib
 from protoscribe.corpus.tools import quantize_sketches_simple
+import seqio
 from sklearn import cluster
-import t5
 
 import glob
 import os
@@ -146,7 +146,7 @@ def main(argv: Sequence[str]) -> None:
       stroke_normalization_type=config.stroke_normalization_type,
       stroke_random_scale_factor=config.stroke_random_scale_factor
   )
-  task = t5.data.TaskRegistry.get(task_name)
+  task = seqio.TaskRegistry.get(task_name)
   ds = task.get_dataset(split=_SPLIT.value)
 
   logging.info("Collecting points ...")

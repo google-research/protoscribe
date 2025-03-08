@@ -48,7 +48,7 @@ from protoscribe.corpus.tools import sample_from_corpus
 from protoscribe.sketches.utils import stroke_stats as norm_lib
 from protoscribe.sketches.utils import stroke_tokenizer as tokenizer_lib
 from protoscribe.sketches.utils import stroke_utils as strokes_lib
-import t5
+import seqio
 import tensorflow as tf
 
 Array = np.ndarray
@@ -265,7 +265,7 @@ def main(argv: Sequence[str]) -> None:
       stroke_normalization_type=config.stroke_normalization_type,
       stroke_random_scale_factor=config.stroke_random_scale_factor
   )
-  task = t5.data.TaskRegistry.get(task_name)
+  task = seqio.TaskRegistry.get(task_name)
   ds = task.get_dataset(split=_SPLIT.value)
 
   tokenizer = None

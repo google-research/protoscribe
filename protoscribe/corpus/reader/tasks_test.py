@@ -23,7 +23,7 @@ from absl.testing import flagsaver
 from absl.testing import parameterized
 import numpy as np
 from protoscribe.corpus.reader import tasks as lib
-import t5
+import seqio
 
 FLAGS = flags.FLAGS
 
@@ -43,7 +43,7 @@ class TasksTest(parameterized.TestCase):
       self, task_name: str, split: str
   ) -> dict[str, np.ndarray]:
     """Selects the first feature."""
-    task = t5.data.TaskRegistry.get(task_name)
+    task = seqio.TaskRegistry.get(task_name)
     self.assertIsNotNone(task)
     ds = task.get_dataset(split=split).take(1)
     ds = list(ds.as_numpy_iterator())

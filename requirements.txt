@@ -20,9 +20,9 @@ protobuf
 pycairo
 pynini
 pytest
+scikit-learn
 scipy
 seaborn
 seqio
 svgpathtools
-t5
 tensorflow

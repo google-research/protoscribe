@@ -21,7 +21,7 @@ from absl.testing import absltest
 import numpy as np
 from protoscribe.sketches.inference import sketch_annotation_task as lib
 from protoscribe.sketches.utils import stroke_tokenizer as tokenizer_lib
-import t5
+import seqio
 
 FLAGS = flags.FLAGS
 
@@ -49,7 +49,7 @@ class SketchAnnotationTaskTest(absltest.TestCase):
     )
     self.assertEqual(full_task_name, "test_sketch_annotation")
 
-    task = t5.data.TaskRegistry.get(full_task_name)
+    task = seqio.TaskRegistry.get(full_task_name)
     self.assertIsNotNone(task)
     ds = task.get_dataset(split=_DEFAULT_SPLIT_NAME).take(_NUM_EXAMPLES)
     ds = list(ds.as_numpy_iterator())
