@@ -25,6 +25,7 @@ from protoscribe.corpus.builder import vision_features_reader as vision
 from protoscribe.glyphs import glyph_vocab as glyph_lib
 from protoscribe.glyphs import make_text
 from protoscribe.glyphs import numbers_to_glyphs
+from protoscribe.glyphs import svg_simplify
 from protoscribe.glyphs import svg_to_strokes
 from protoscribe.language.embeddings import embedder
 from protoscribe.language.phonology import phonetic_embeddings as phon_embed_lib
@@ -64,6 +65,9 @@ svg_to_strokes.FLAGS.deltas = True
 svg_to_strokes.FLAGS.apply_rdp = True
 svg_to_strokes.FLAGS.rdp_tolerance = 2.0
 svg_to_strokes.FLAGS.path_is_stroke = True
+svg_simplify.FLAGS.fixed_svg_width = -1
+svg_simplify.FLAGS.fixed_svg_height = -1
+svg_simplify.FLAGS.svg_min_dim = 300  # Fixed width or height (in pixels).
 
 
 @dataclasses.dataclass
