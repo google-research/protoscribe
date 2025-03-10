@@ -155,7 +155,9 @@ def main(argv: list[str]) -> None:
     logging.info("Writing scorer file %s ...", _OUTPUT_FILE_FOR_SCORER.value)
     with open(_OUTPUT_FILE_FOR_SCORER.value, "wt") as f:
       for score_dict in scorer_dicts:
-        f.write(json.dumps(score_dict, sort_keys=True) + "\n")
+        f.write(
+            json.dumps(score_dict, sort_keys=True, ensure_ascii=False) + "\n"
+        )
 
   # Write a more human-readable TSV file. Please note, the file will contain
   # duplicate entries corresponding to the input concepts because the real

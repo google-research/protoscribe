@@ -207,7 +207,12 @@ def write_inferences_to_file(
         json_dict['aux'] = jax.tree.map(_json_compat, aux_values)
       else:
         raise ValueError(f'Invalid mode: {mode}')
-      json_str = json.dumps(json_dict, cls=json_encoder_cls)
+      json_str = json.dumps(
+          json_dict,
+          cls=json_encoder_cls,
+          # Keep UTF-8 encoding to avoid issues with non-ASCII characters.
+          ensure_ascii=False
+      )
       f.write(json_str + '\n')
 
 
