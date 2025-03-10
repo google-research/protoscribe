@@ -144,14 +144,6 @@ def json_to_sketch(
     scorer_dict["glyph.names.best"] = " ".join(best_names)
     scorer_dict["glyph.prons.best"] = json_utils.glyph_pron(scorer_dict, k=-1)
 
-  # Process the actual strokes.
-  nbest_strokes, nbest_polylines = _strokes_from_json(
-      config, sketch_dict, input_text, stroke_stats, stroke_tokenizer
-  )
-
-  if _SAVE_STROKES_IN_JSONL.value:
-    scorer_dict["strokes.nbest.deltas"] = [s.tolist() for s in nbest_strokes]
-
   # Set the sketch confidence. This may have been propagated by the recognizer
   # already or needs to be computed from the JSONL.
   if "sketch.confidence" in sketch_dict["inputs"]:
@@ -163,6 +155,21 @@ def json_to_sketch(
     if COMBINED_GLYPHS_AND_STROKES.value:
       confidence = json_utils.get_confidence(sketch_dict)
     scorer_dict["sketch.confidence"] = confidence
+
+  # Process the actual strokes.
+  nbest_strokes, nbest_polylines = _strokes_from_json(
+      config, sketch_dict, input_text, stroke_stats, stroke_tokenizer
+  )
+  if not nbest_strokes or not nbest_polylines:
+    # This usually happens when the stroke prediction is corrupt due to a
+    # suboptimal model *and* the errors during token parsing are ignored.
+    # In this case we simply set the confidences to a minimum.
+    scorer_dict["glyph.confidence"] = 0.
+    scorer_dict["sketch.confidence"] = 0.
+    return scorer_dict
+
+  if _SAVE_STROKES_IN_JSONL.value:
+    scorer_dict["strokes.nbest.deltas"] = [s.tolist() for s in nbest_strokes]
 
   # Save vector graphics.
   if _SAVE_SVG.value:
@@ -331,24 +338,27 @@ def _strokes_from_json(
           token_is_glyph = False
       tokens = sketch_tokens
 
-    # There should be a delimiter between numeric and concept subsequences.
-    if SketchToken.END_OF_NUMBERS not in tokens:
-      msg = f"{input_text}: {hyp_str}Number-concept delimiter missing!"
-      if _IGNORE_ERRORS.value:
-        logging.error(msg)
-        continue
-      raise ValueError(msg)
-    end_of_numbers_pos = tokens.index(SketchToken.END_OF_NUMBERS)
-
-    # Check for BOS/EOS.
+    # Check for BOS.
     if tokens[0] != SketchToken.START_OF_SKETCH:
       msg = f"{input_text}: {hyp_str}BOS sketch token missing!"
       if _IGNORE_ERRORS.value:
         logging.error(msg)
         continue
       raise ValueError(msg)
-
     tokens = tokens[1:]
+
+    # There should always be a delimiter between numeric and concept
+    # subsequences.
+    if SketchToken.END_OF_NUMBERS in tokens:
+      end_of_numbers_pos = tokens.index(SketchToken.END_OF_NUMBERS)
+    else:
+      msg = f"{input_text}: {hyp_str}Number-concept delimiter missing!"
+      if _IGNORE_ERRORS.value:
+        logging.error(msg)
+        continue
+      raise ValueError(msg)
+
+    # Check for EOS.
     if SketchToken.END_OF_SKETCH in tokens:
       eos_pos = tokens.index(SketchToken.END_OF_SKETCH)
     else:
@@ -367,12 +377,23 @@ def _strokes_from_json(
     # numbers if enabled.
     tokens = tokens[:eos_pos]
     if _PRUNE_NUMBERS.value:
-      tokens = tokens[end_of_numbers_pos:]
-    tokens = np.array(tokens, dtype=np.int32)
+      tokens = tokens[end_of_numbers_pos + 1:]
+    else:  # Simply remove the end-of-numbers separator.
+      del tokens[end_of_numbers_pos]
+
+    # Sanity check for the remaining tokens. We can only generate the strokes
+    # from two tokens or more.
+    if len(tokens) < 2:
+      msg = f"{input_text}: {hyp_str}No tokens remaining for drawing strokes!"
+      if _IGNORE_ERRORS.value:
+        logging.error(msg)
+        continue
+      raise ValueError(msg)
 
     # Detokenize into sketch-3 format, denormalize (if normalization was
     # originally applied) and convert the resulting points to plottable
     # polylines.
+    tokens = np.array(tokens, dtype=np.int32)
     strokes = stroke_tokenizer.decode(tokens)
     strokes = stats_lib.denormalize_strokes_array(config, stroke_stats, strokes)
     nbest_strokes.append(strokes)
