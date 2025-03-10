@@ -19,8 +19,8 @@ from __gin__ import dynamic_registration
 include "protoscribe/models/pmmx/configs/reco_glyph/model_common.gin"
 
 # Architecture overrides.
-NUM_ENCODER_LAYERS = 12
-NUM_DECODER_LAYERS = 12
+NUM_ENCODER_LAYERS = 18
+NUM_DECODER_LAYERS = 6
 NUM_HEADS = 12
 HEAD_DIM = 64
 ENCODER_EMBED_DIM = 128
