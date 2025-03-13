@@ -18,6 +18,7 @@ from typing import Optional
 
 import ml_collections
 import numpy as np
+from protoscribe.corpus.reader import utils
 from protoscribe.glyphs import glyph_vocab as glyph_lib
 from protoscribe.sketches.utils import stroke_stats as stroke_stats_lib
 from protoscribe.sketches.utils import stroke_tokenizer as tokenizer_lib
@@ -40,18 +41,6 @@ def _random_scale_strokes(
     return x * x_scale_factor, y * y_scale_factor
   else:
     return x, y
-
-
-def _pad_strokes(
-    inputs: tf.Tensor, max_stroke_sequence_length: int
-) -> tf.Tensor:
-  """Pads the inputs as necessary."""
-  pad_size = max_stroke_sequence_length - tf.shape(inputs)[0]
-  if len(tf.shape(inputs)) == 2:
-    paddings = [[0, pad_size], [0, 0]]
-  else:  # Assume 1D inputs.
-    paddings = [[0, pad_size]]
-  return tf.pad(inputs, paddings)
 
 
 def _points_to_strokes3(
@@ -124,7 +113,9 @@ def _strokes3_to_strokes5(
       tf.constant([[0., 0., 0, 0, 1]], dtype=tf.float32)
   ], axis=0)
   if config.manual_padding:
-    strokes_5 = _pad_strokes(strokes_5, max_stroke_sequence_length)
+    strokes_5 = utils.pad_or_trim_sequence(
+        strokes_5, max_stroke_sequence_length
+    )
   return strokes_5, real_length
 
 
@@ -197,7 +188,9 @@ def parse_sketch_strokes_or_tokens(
       [[glyph_lib.GLYPH_BOS], glyph_ids, [glyph_lib.GLYPH_EOS]], axis=0
   )
   if config.manual_padding:
-    glyph_ids = _pad_strokes(glyph_ids, max_stroke_sequence_length)
+    glyph_ids = utils.pad_or_trim_sequence(
+        glyph_ids, max_stroke_sequence_length
+    )
   return strokes_5, glyph_ids, real_length
 
 
