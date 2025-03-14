@@ -10,3 +10,6 @@
 
 * `infer_eval_combined_strokes_and_glyphs.jsonl`: Combined discrete glyph and
   sketch token predictions.
+
+* `infer_eval_sketch_only_flax_model.jsonl`: Stroke token predictions using
+  vanilla (non-PMMX) Flax implementation.

@@ -18,6 +18,7 @@ import os
 
 from absl import flags
 from absl.testing import absltest
+from absl.testing import parameterized
 import numpy as np
 from protoscribe.sketches.inference import sketch_annotation_task as lib
 from protoscribe.sketches.utils import stroke_tokenizer as tokenizer_lib
@@ -25,9 +26,8 @@ import seqio
 
 FLAGS = flags.FLAGS
 
-_JSONL_PATH = (
+_TEST_DATA_DIR = (
     "protoscribe/sketches/inference/testdata/"
-    "infer_eval_sketch_only.jsonl"
 )
 
 _TASK_NAME_PREFIX = "test"
@@ -37,17 +37,27 @@ _MAX_INPUT_TOKENS = 250
 _MAX_GLYPH_TOKENS = 20
 
 
-class SketchAnnotationTaskTest(absltest.TestCase):
+class SketchAnnotationTaskTest(parameterized.TestCase):
 
-  def test_simple(self):
-    """Tests that the output examples are generally sane."""
+  @parameterized.named_parameters(
+      # This example has all the stroke sequences padded and no beam.
+      ("pmmx-model", "pmmx", "infer_eval_sketch_only.jsonl", False),
+      # Following example has unpadded sequences and four beam hypotheses.
+      ("flax-model", "flax", "infer_eval_sketch_only_flax_model.jsonl", True)
+  )
+  def test_simple_from_jsonl(
+      self, model_type: str, jsonl_filename: str, multiple_hypotheses: bool
+  ):
+    """Tests that the output examples are generally sane (inputs from PMMX)."""
 
     full_task_name = lib.register_for_inference(
-        task_name_prefix=_TASK_NAME_PREFIX,
-        jsonl_file_path=os.path.join(FLAGS.test_srcdir, _JSONL_PATH),
+        task_name_prefix=f"{model_type}_{_TASK_NAME_PREFIX}",
+        jsonl_file_path=os.path.join(
+            FLAGS.test_srcdir, _TEST_DATA_DIR, jsonl_filename
+        ),
         max_stroke_sequence_length=_MAX_INPUT_TOKENS,
     )
-    self.assertEqual(full_task_name, "test_sketch_annotation")
+    self.assertEqual(full_task_name, f"{model_type}_test_sketch_annotation")
 
     task = seqio.TaskRegistry.get(full_task_name)
     self.assertIsNotNone(task)
@@ -93,8 +103,14 @@ class SketchAnnotationTaskTest(absltest.TestCase):
       self.assertIn("text.words", example)
       text_words = example["text.words"].decode("utf-8")
       self.assertNotEmpty(text_words)
+
+      # Check stroke generation confidence: This depends on whether beam
+      # information is available.
       self.assertIn("sketch.confidence", example)
-      self.assertEqual(example["sketch.confidence"], 0.)  # Beam-less test data.
+      if multiple_hypotheses:
+        self.assertGreater(example["sketch.confidence"], 0.)
+      else:
+        self.assertEqual(example["sketch.confidence"], 0.)  # Beam-less.
 
 
 if __name__ == "__main__":

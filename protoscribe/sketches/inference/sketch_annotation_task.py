@@ -24,6 +24,7 @@ import logging
 from typing import Any, Callable
 
 import gin
+import numpy as np
 from protoscribe.glyphs import glyph_vocab as glyph_lib
 from protoscribe.sketches.inference import json_utils
 from protoscribe.sketches.utils import stroke_tokenizer as tokenizer_lib
@@ -32,7 +33,7 @@ import tensorflow as tf
 
 
 def _convert_json_example(
-    json_example: bytes
+    json_example: bytes, max_stroke_sequence_length: int
 ) -> tuple[list[int], int, str, str, str, str, float]:
   """Converts an example from json format."""
 
@@ -44,6 +45,11 @@ def _convert_json_example(
   if isinstance(prediction[0], list):
     # When running the annotation, we only look at the top hypothesis.
     prediction = prediction[-1]
+
+  # Pad sketch tokens to maximum length, if needed.
+  pad_amount = max_stroke_sequence_length - len(prediction)
+  if pad_amount > 0:
+    prediction = np.pad(prediction, [[0, pad_amount]])
 
   # Pass-through features. Add more as required. The `doc.id` (integer) tensor
   # gets dumped as float for some reason. Cast it to int.
@@ -77,14 +83,19 @@ def _make_line_parser(
     max_glyph_sequence_length: int,
     stateful: bool = False
 ) -> Callable[[tf.data.Dataset], tf.data.Dataset]:
-  """Wraps a `fn` that takes bytes (e.g. json) and outputs inputs+targets."""
+  """Wraps a `fn` that takes bytes (single JSON) and outputs inputs+targets."""
 
   def tf_parse(line: tf.Tensor) -> dict[str, tf.Tensor]:
     (
         inputs, doc_id, number_name, concept_name,
         pron_sampa, words, confidence
-    ) = tf.compat.v1.py_func(
-        parse_fn, inp=[line], Tout=[
+    ) = tf.numpy_function(
+        parse_fn,
+        inp=[
+            line,
+            tf.constant(max_stroke_sequence_length)  # For padding.
+        ],
+        Tout=[
             tf.int64,    # Inputs: sketch tokens.
             tf.int64,    # Document ID.
             tf.string,   # Number name.
@@ -92,7 +103,8 @@ def _make_line_parser(
             tf.string,   # SAMPA pronunciation.
             tf.string,   # Words.
             tf.float64,  # Generation confidence.
-        ], stateful=stateful
+        ],
+        stateful=stateful
     )
     # The reshape is necessary as otherwise the tensor has unknown rank.
     inputs.set_shape([1, max_stroke_sequence_length])
