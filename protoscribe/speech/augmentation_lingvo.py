@@ -28,9 +28,6 @@ from typing import Callable
 from protoscribe.speech import tf_utils
 import tensorflow as tf
 
-# This creates global step variable.
-tf_utils.get_or_create_global_step_var()
-
 
 @dataclasses.dataclass
 class AugmenterConfig:
@@ -1026,6 +1023,14 @@ def _augmentation_network(
     inputs = tf.reshape(inputs, original_shape)
 
   return inputs
+
+
+def tf_spec_augment_init() -> None:
+  """Global initialization for spectrum augmenter.
+
+  Should be called once ideally to create a global step variable.
+  """
+  tf_utils.get_or_create_global_step_var()
 
 
 def tf_spec_augment_lingvo(

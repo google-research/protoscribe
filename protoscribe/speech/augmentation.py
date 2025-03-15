@@ -32,6 +32,14 @@ def _default_spec_augment_config() -> ml_collections.FrozenConfigDict:
   })
 
 
+def tf_spec_augment_init() -> None:
+  """Global initialization for spectrum augmenter.
+
+  Should be called once ideally to create a global step variable.
+  """
+  impl_lib.tf_spec_augment_init()
+
+
 def tf_spec_augment(
     spectrum: tf.Tensor,
     config: ml_collections.FrozenConfigDict | None = None,

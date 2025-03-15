@@ -25,6 +25,10 @@ _NUM_INSTANCES = 10
 
 class AugmentationTest(tf.test.TestCase):
 
+  def setUp(self):
+    super().setUp()
+    lib.tf_spec_augment_init()
+
   def test_with_default_config(self):
     input_shape = [_NUM_TIME_STEPS, _NUM_FREQ_BINS]
     inputs = tf.ones(input_shape, dtype=tf.float32)

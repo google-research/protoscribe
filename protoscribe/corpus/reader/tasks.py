@@ -28,6 +28,7 @@ from protoscribe.corpus.reader import metrics
 from protoscribe.glyphs import glyph_vocab as glyph_lib
 from protoscribe.sketches.utils import stroke_tokenizer as tokenizer_lib
 from protoscribe.speech import audio_tokenizer
+from protoscribe.speech import augmentation
 import seqio
 import tensorflow as tf
 
@@ -453,6 +454,10 @@ def register(
 
   sketch_stroke_stats = ds_lib.get_sketch_stroke_stats(config)
   stroke_tokenizer = ds_lib.get_stroke_tokenizer(config)
+
+  if is_training and speech_spectrum_augmentation:
+    # Initialize spectrum augmentation.
+    augmentation.tf_spec_augment_init()
 
   speech_tokenizer = None
   if speech_tokenizer_name_or_path:

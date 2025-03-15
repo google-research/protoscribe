@@ -21,6 +21,10 @@ import tensorflow as tf
 
 class AugmentationTest(tf.test.TestCase):
 
+  def setUp(self):
+    super().setUp()
+    lib.tf_spec_augment_init()
+
   def test_with_time_mask(self):
     tf.random.set_seed(127)
     batch_size = 5
