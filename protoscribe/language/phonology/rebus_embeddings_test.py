@@ -14,7 +14,6 @@
 
 """Test for `protoscribe.language.phonology.rebus_embeddings`."""
 
-import logging
 import os
 
 from absl import flags
