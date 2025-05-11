@@ -36,9 +36,11 @@ from t5x import losses
 JTensor = jnp.ndarray
 
 
-def clamp_probs(probs: JTensor) -> JTensor:
-  eps = jnp.finfo(probs.dtype).eps
-  return jnp.clip(probs, min=eps, max=1 - eps)
+def clamp_probs(
+    probs: JTensor, eps: float = 1e-6
+) -> JTensor:
+  """Brings all probabilities in range [eps, 1-eps]."""
+  return jnp.clip(probs, min=eps, max=1. - eps)
 
 
 def cb_log_norm_const(

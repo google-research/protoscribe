@@ -25,16 +25,33 @@ from protoscribe.sketches.utils import continuous_bernoulli as lib
 class LossesTest(parameterized.TestCase):
 
   @parameterized.parameters(
+      (5), (10), (30), (60),
+  )
+  def test_clamp_probs(self, feature_dim: int):
+    rng_key = jax.random.PRNGKey(42)
+    batch = 2
+    seqlen = 5
+    eps = 1e-5
+    logits = -2. * jax.random.normal(
+        rng_key, shape=(batch, seqlen, feature_dim), dtype=jnp.float32
+    )
+    probs = lib.clamp_probs(
+        jax.nn.softmax(logits, axis=-1), eps=eps
+    )
+    self.assertLessEqual(np.max(probs), 1. - eps)
+    self.assertGreaterEqual(np.min(probs), eps)
+
+  @parameterized.parameters(
       (5, 5), (10, 5), (100, 4), (500, 3)
   )
   def test_continuous_bernoulli(
       self, feature_dim: int, precision: int
   ):
-    key = jax.random.PRNGKey(42)
+    rng_key = jax.random.PRNGKey(42)
     batch = 2
     seqlen = 5
     logits = jax.random.uniform(
-        key,
+        rng_key,
         minval=-4.0,
         maxval=4.0,
         shape=(batch, seqlen, feature_dim),
@@ -69,7 +86,7 @@ class LossesTest(parameterized.TestCase):
 
     # Check loss.
     target_probs = jax.random.uniform(
-        key,
+        rng_key,
         shape=(batch, seqlen, feature_dim),
         dtype=jnp.float32,
     )
