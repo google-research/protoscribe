@@ -1,4 +1,4 @@
-# Copyright 2024 The Protoscribe Authors.
+# Copyright 2025 The Protoscribe Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,13 +33,15 @@ def pad_or_trim_sequence(
     Padded tensor.
   """
   pad_amount = max_sequence_length - tf.shape(inputs)[0]
-  if pad_amount < 0:
+  if pad_amount == 0:
+    return inputs
+  elif pad_amount < 0:
     return inputs[:pad_amount, ...]
+  else:
+    rank = len(tf.shape(inputs))  # For some reason `tf.rank` doesn't work here.
+    if rank == 2:
+      paddings = [[0, pad_amount], [0, 0]]
+    else:  # Assume 1-D.
+      paddings = [[0, pad_amount]]
 
-  rank = len(tf.shape(inputs))  # For some reason `tf.rank` doesn't work here.
-  if rank == 2:
-    paddings = [[0, pad_amount], [0, 0]]
-  else:  # Assume 1-D.
-    paddings = [[0, pad_amount]]
-
-  return tf.pad(inputs, paddings, mode="CONSTANT", constant_values=0)
+    return tf.pad(inputs, paddings, mode="CONSTANT", constant_values=0)

@@ -1,4 +1,4 @@
-# Copyright 2024 The Protoscribe Authors.
+# Copyright 2025 The Protoscribe Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,6 +43,10 @@ class UtilsTest(absltest.TestCase):
         self._pad_or_trim_list(inputs, max_sequence_length),
         [1, 2, 3, 4, 5, 6, 7]
     )
+    inputs = [1, 2, 3, 4, 5, 6, 7]
+    self.assertEqual(
+        self._pad_or_trim_list(inputs, max_sequence_length), inputs
+    )
 
   def test_2D_trim_or_pad(self):
     inputs = [[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]]
@@ -60,6 +64,9 @@ class UtilsTest(absltest.TestCase):
     self.assertEqual(
         self._pad_or_trim_list(inputs, max_sequence_length=3),
         [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    )
+    self.assertEqual(
+        self._pad_or_trim_list(inputs, max_sequence_length=4), inputs
     )
 
 
