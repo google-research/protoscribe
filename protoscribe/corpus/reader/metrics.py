@@ -67,9 +67,9 @@ def wer(
     WER across all targets and predictions.
   """
   wer_default = jiwer.wer(
-      truth=_stringify_tokens(targets),
+      reference=_stringify_tokens(targets),
       hypothesis=_stringify_tokens(predictions),
-      truth_transform=jiwer.transformations.wer_default,
+      reference_transform=jiwer.transformations.wer_default,
       hypothesis_transform=jiwer.transformations.wer_default,
   )
   return {"wer": wer_default}
