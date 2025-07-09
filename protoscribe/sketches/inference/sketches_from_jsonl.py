@@ -116,7 +116,7 @@ def json_to_sketch(
   scorer_dict = json_utils.get_scorer_dict(sketch_dict, pronunciation_lexicon)
   input_text, title = _title_from_inputs(scorer_dict)
   logging.info(
-      "[doc: %d] Processing \"%s\" ...", scorer_dict["doc.id"], input_text
+      "%s: Processing document %d ...", input_text, scorer_dict["doc.id"]
   )
 
   # Check if glyph predictions are available. These should be present in the
@@ -402,7 +402,7 @@ def _strokes_from_json(
     nbest_strokes.append(strokes)
     strokes_list = stroke_lib.stroke3_deltas_to_polylines(strokes)
     logging.info(
-        "%s %s %d tokens, %d stroke deltas",
+        "%s: %s %d tokens, %d stroke deltas",
         input_text, hyp_str, strokes.shape[0], len(strokes_list)
     )
     nbest_polylines.append(strokes_list)
