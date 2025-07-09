@@ -115,6 +115,9 @@ def json_to_sketch(
   """Generates sketch from the decoding results."""
   scorer_dict = json_utils.get_scorer_dict(sketch_dict, pronunciation_lexicon)
   input_text, title = _title_from_inputs(scorer_dict)
+  logging.info(
+      "[doc: %d] Processing \"%s\" ...", scorer_dict["doc.id"], input_text
+  )
 
   # Check if glyph predictions are available. These should be present in the
   # output of the recognizer (in recognizer's JSONLs) or when the sketch
