@@ -1,6 +1,7 @@
 absl-py
 apache-beam
 chex
+clu
 flax
 gensim
 gin
@@ -15,6 +16,7 @@ networkx
 nltk
 numpy
 optax
+orbax
 pandas
 protobuf
 pycairo
